@@ -48,18 +48,6 @@ error during System Exclusive input.
 It is in the 0.0.x series for that reason, not because anything is known to be
 missing.
 
-## Two things Windows does differently
-
-* **Whether two programs can open the same port depends on the port.** Under
-  Windows MIDI Services, on Windows 11, ports carried by the new transports are
-  shared; ports still on the older drivers are exclusive, as they always were,
-  and so is everything on Windows 10.
-* **Routing MIDI between applications has to be set up.** Windows has no
-  equivalent of the IAC bus macOS provides. On Windows 11 the Windows MIDI
-  Services tools — a separate download — create loopback endpoints, which this
-  library then sees as ordinary ports; otherwise a third-party driver such as
-  loopMIDI does the same job.
-
 ## Requirements
 
 * [ffi](http://github.com/ffi/ffi)
