@@ -132,6 +132,27 @@ polls.</p>
 </ul>
 <p>Nothing else. <code>winmm.dll</code> is part of Windows, so this gem binds a library that
 is already on the machine and ships no compiled artifact of its own.</p>
+<h3 id="Which_versions_of_Windows">Which versions of Windows</h3>
+<p><strong>By construction, old ones.</strong> Everything this gem calls is the oldest MIDI API
+Windows has — <code>midiInOpen</code>, <code>midiOutShortMsg</code>, <code>midiOutLongMsg</code> and their
+neighbours — plus three functions for a thread's message queue, <code>GetMessageW</code>,
+<code>PeekMessageW</code> and <code>PostThreadMessageW</code>. All of it, the Unicode entry points
+included, dates from the NT era. Nothing here calls Windows MIDI Services, which
+means nothing here needs Windows 11.</p>
+<p>What changes on an older system is not whether the gem works but what the
+platform gives it. Before Windows MIDI Services a MIDI port is <strong>exclusive</strong> —
+one program at a time — and there are no system loopback endpoints, so routing
+MIDI between applications on one machine needs a third-party driver such as
+loopMIDI. The same code, a poorer platform.</p>
+<p>A 32-bit Ruby should also be fine: the two size checks that only hold on 64-bit
+Windows are guarded, and the two that are checked everywhere describe structures
+whose layout does not depend on the word size.</p>
+<p><strong>None of which has been run.</strong> The only system this has ever executed on is
+Windows 11 25H2, in a virtual machine, on an x64 Ruby under ARM emulation. The
+paragraphs above say what the code asks of Windows, not what has been observed;
+treat them as a reason to expect it to work rather than as a report that it does.</p>
+<p>Where the floor actually sits is a question about Ruby, not about this gem:
+RubyInstaller recommends Windows 10 or 11 and publishes no hard cutoff.</p>
 <h2 id="Installation">Installation</h2>
 <p>If you're using Bundler, add this line to your application's Gemfile:</p>
 <p><code>gem &quot;midi-communications-windows&quot;</code></p>
@@ -209,7 +230,7 @@ Both are addressed here by construction; see the notes in
 <p><a href="https://github.com/javier-sy/midi-communications-windows">MIDI Communications Windows Layer</a> Copyright (c) 2026 <a href="https://yeste.studio">Javier Sánchez Yeste</a>, licensed under LGPL 3.0 License</p></div></div>
 
       <div id="footer">
-  Generated on Sun Sep  6 21:19:26 2026 by
+  Generated on Sun Sep  6 21:20:52 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-3.4.7).
 </div>

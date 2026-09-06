@@ -55,6 +55,33 @@ polls.
 Nothing else. `winmm.dll` is part of Windows, so this gem binds a library that
 is already on the machine and ships no compiled artifact of its own.
 
+### Which versions of Windows
+
+**By construction, old ones.** Everything this gem calls is the oldest MIDI API
+Windows has — `midiInOpen`, `midiOutShortMsg`, `midiOutLongMsg` and their
+neighbours — plus three functions for a thread's message queue, `GetMessageW`,
+`PeekMessageW` and `PostThreadMessageW`. All of it, the Unicode entry points
+included, dates from the NT era. Nothing here calls Windows MIDI Services, which
+means nothing here needs Windows 11.
+
+What changes on an older system is not whether the gem works but what the
+platform gives it. Before Windows MIDI Services a MIDI port is **exclusive** —
+one program at a time — and there are no system loopback endpoints, so routing
+MIDI between applications on one machine needs a third-party driver such as
+loopMIDI. The same code, a poorer platform.
+
+A 32-bit Ruby should also be fine: the two size checks that only hold on 64-bit
+Windows are guarded, and the two that are checked everywhere describe structures
+whose layout does not depend on the word size.
+
+**None of which has been run.** The only system this has ever executed on is
+Windows 11 25H2, in a virtual machine, on an x64 Ruby under ARM emulation. The
+paragraphs above say what the code asks of Windows, not what has been observed;
+treat them as a reason to expect it to work rather than as a report that it does.
+
+Where the floor actually sits is a question about Ruby, not about this gem:
+RubyInstaller recommends Windows 10 or 11 and publishes no hard cutoff.
+
 ## Installation
 
 If you're using Bundler, add this line to your application's Gemfile:
