@@ -29,8 +29,15 @@ not been exercised is anything needing real hardware — a physical interface sl
 enough to make `Output`'s System Exclusive wait mean something, and a port
 appearing or disappearing while the program runs.
 
-The version says 0.0.1 because that is a virtual machine with no MIDI hardware
-in it, not because anything is known to be missing.
+The version stays in the 0.0.x series because that was a virtual machine with no
+MIDI hardware in it, not because anything is known to be missing. It will not be
+published to RubyGems until a physical MIDI interface has closed the items
+[`docs/testing-on-windows.md`](docs/testing-on-windows.md) lists as untestable
+without one.
+
+That document is also how to rebuild the test environment: it is the procedure
+these measurements were taken with, including how to make two ports collide in
+WinMM's 31 characters of name.
 
 ### One thing worth knowing before you use it
 

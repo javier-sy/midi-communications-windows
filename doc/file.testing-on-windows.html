@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: testing-on-windows
+  
+    &mdash; MIDI Communications Windows API
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "testing-on-windows";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: testing-on-windows</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="Testing_this_gem_on_Windows_without_MIDI_hardware">Testing this gem on Windows without MIDI hardware</h1>
+<p><em>Written 2026-09-06. Section 1 is the part with a shelf life: it describes
+software that was in preview at the time, which Microsoft's release notes said
+was headed for Windows 11 25H2 and later during the last week of November 2026.
+If that has happened, most of section 1 collapses into &quot;nothing to install&quot; and
+the rest still applies.</em></p>
+<p>This is <strong>the procedure the library was measured with</strong>, not a promise that it
+works on another machine. All of it ran once, on one particular installation.
+Where something was checked, it says so; where it was not, it says that too.</p>
+<p>The machine was:</p>
+<p>| | |
+|---|---|
+| Windows | 11 25H2, build <strong>26200.9278</strong> |
+| CPU | ARM64 — a VMware VM on Apple silicon |
+| Ruby | 3.4.10 <code>x64-mingw-ucrt</code>, <strong>emulated</strong> under Prism (no ARM64 Ruby present) |
+| ffi | 1.17.4 <code>x64-mingw-ucrt</code>, precompiled binary |
+| MIDI hardware | <strong>none</strong> — no USB device passed through to the guest |</p>
+<p>That last row is why this document exists: with no hardware, a loopback pair is
+the only way to exercise input and output at the same time.</p>
+<p>Nothing measured on this setup says anything about <strong>timing</strong>. Emulation inside
+a virtual machine; latency and jitter need real hardware and a native Ruby.</p>
+<hr />
+<h2 id="1__What_has_to_be_installed">1. What has to be installed</h2>
+<p>Windows 11 25H2 ships <strong>Windows MIDI Services</strong> in the box: the <code>midisrv</code>
+service (<code>C:\Windows\System32\midisrv.exe</code>) and the <code>wdmaud2.drv</code> shim,
+registered as <code>midi1</code> under
+<code>HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Drivers32</code>. That shim is what
+makes endpoints from the new stack <strong>visible to WinMM</strong> without this gem doing
+anything special, and therefore what makes this setup able to test a gem that
+speaks only WinMM.</p>
+<p>What is <em>not</em> in the box are the MIDI 1.0 loopback transport and the tools. Those
+come from the [<code>microsoft/MIDI</code>] repository, release <code>inbox-dev-preview-6</code>:</p>
+<ul>
+<li><code>Windows.MIDI.Services.Basic.MIDI.1.0.Loopback.Preview.1.0.18-preview.3-arm64.exe</code></li>
+<li><code>Windows.MIDI.Services.Tools.0.99.64-devpreview.6-arm64.exe</code></li>
+</ul>
+<p>There are <code>-x64</code> variants of both. The measuring machine used the <strong>native ARM64</strong>
+ones (PE header <code>0xAA64</code>) even though the Ruby was emulated x64: the gem talks to
+<code>winmm.dll</code>, and Windows handles the crossing.</p>
+<p>The Network and Bluetooth transports from the same release are not needed.</p>
+<h3 id="Warnings_that_are_not_optional">Warnings that are not optional</h3>
+<ul>
+<li><strong>These are unsigned preview binaries.</strong> The release notes require Windows
+<strong>Developer Mode</strong>, and are explicit: <em>&quot;There are almost certainly bugs and
+missing/incomplete features.&quot;</em> This is not production software.</li>
+<li><strong>Do not redistribute them.</strong> The release's permitted-use table forbids it. A
+repository should link to the release and never host the installers.</li>
+<li>Minimum system version declared: <strong>Windows 11 25H2</strong>.</li>
+<li>Downloaded through a browser they carry Mark of the Web and SmartScreen will
+object; <code>Unblock-File</code> clears it. Fetched with <code>Invoke-WebRequest</code> they do not.</li>
+</ul>
+<h2 id="2__Installing">2. Installing</h2>
+<p>Both installers are <strong>WiX bundles</strong>, so they accept <code>/quiet</code>, <code>/norestart</code> and
+<code>/log</code>. Both need <strong>elevation</strong>, and Developer Mode writes to <code>HKLM</code>, so it is
+worth doing the whole thing in one elevated script and getting one UAC prompt.</p>
+<p>The release notes fix the order: <strong>loopback transport first, tools second.</strong></p>
+<pre class="code powershell"><code class="powershell"># --- 1. Developer Mode (the key may not exist)
+$k = &#39;HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock&#39;
+if (-not (Test-Path $k)) { New-Item $k -Force | Out-Null }
+Set-ItemProperty $k -Name AllowDevelopmentWithoutDevLicense -Value 1 -Type DWord
+Set-ItemProperty $k -Name AllowAllTrustedApps -Value 1 -Type DWord
+
+# --- 2. installers, in this order
+Start-Process -Wait -FilePath &#39;&lt;...&gt;Basic.MIDI.1.0.Loopback.Preview...-arm64.exe&#39; `
+  -ArgumentList &#39;/quiet&#39;,&#39;/norestart&#39;,&#39;/log&#39;,&#39;loopback.log&#39;
+Start-Process -Wait -FilePath &#39;&lt;...&gt;Tools.0.99.64-devpreview.6-arm64.exe&#39; `
+  -ArgumentList &#39;/quiet&#39;,&#39;/norestart&#39;,&#39;/log&#39;,&#39;tools.log&#39;
+</code></pre>
+<p><strong>Both return exit <code>3010</code></strong>, which is <code>ERROR_SUCCESS_REBOOT_REQUIRED</code>: installed
+correctly, reboot pending. The measuring machine <strong>was not rebooted</strong>, and every
+measurement was taken that way. If something behaves oddly, that reboot is the
+first suspect.</p>
+<p>To check the transport registered:</p>
+<pre class="code powershell"><code class="powershell">Get-ChildItem &#39;HKLM:\SOFTWARE\Microsoft\Windows MIDI Services\Transport Plugins&#39;
+# Midi2BasicLoopbackMidiTransport should appear, with Enabled = 1
+</code></pre>
+<h3 id="_midi_exe__and_the_PATH"><code>midi.exe</code> and the PATH</h3>
+<p>The console lands at:</p>
+<pre class="code ruby"><code class="ruby">C:\Program Files\Windows MIDI Services\Tools\Console\midi.exe
+</code></pre>
+<p>The installer <strong>does</strong> add it to the machine PATH, but <strong>a shell opened before
+installing still has the old environment</strong> and will say <code>midi</code> does not exist. In
+a fresh shell, <code>midi</code> is enough; in the installing shell, use the full path. This
+detail cost time and produced one wrong report before it was noticed.</p>
+<h2 id="3__Creating_the_loopback_pair">3. Creating the loopback pair</h2>
+<pre class="code powershell"><code class="powershell">$midi = &#39;C:\Program Files\Windows MIDI Services\Tools\Console\midi.exe&#39;
+
+&amp; $midi basic-loopback create --name &quot;Reloj Bitwig ñ prueba de longitud&quot;
+&amp; $midi basic-loopback list
+</code></pre>
+<p>Options for <code>create</code>:</p>
+<table>
+<thead>
+<tr>
+<th>option</th>
+<th>what it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-n</code>, <code>--name</code></td>
+<td>the endpoint's name</td>
+</tr>
+<tr>
+<td><code>-u</code>, <code>--unique-identifier</code></td>
+<td>an identifier of your own</td>
+</tr>
+<tr>
+<td><code>-s</code>, <code>--save-to-config</code></td>
+<td><strong>persists it in the system configuration</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Without <code>--save-to-config</code> a loopback is temporary</strong>: it disappears when
+<code>midisrv</code> or the machine restarts, and nothing is written to disk. Every
+measurement was taken that way, deliberately. <code>--save-to-config</code> does modify the
+user's system configuration — ask before using it.</p>
+<p>A <code>create</code> returns an <strong>Association Id</strong>, a GUID. Keep it: it is the only thing
+that will remove the loopback again.</p>
+<h3 id="Checking_through_WinMM__which_is_what_the_gem_sees">Checking through WinMM, which is what the gem sees</h3>
+<pre class="code ruby"><code class="ruby">ruby -Ilib examples/list_ports.rb
+</code></pre>
+<p>One loopback shows up as <strong>one input and one output with the same name, byte for
+byte</strong>. With two loopbacks created, enumeration gives 2 inputs and 3 outputs —
+the third being the <em>Microsoft GS Wavetable Synth</em>, which is always there.</p>
+<h2 id="4__The_name_collision_recipe">4. The name-collision recipe</h2>
+<p>WinMM stores <strong>31 characters</strong> of a name (<code>MAXPNAMELEN</code> is 32, less the NUL) and
+drops the rest <strong>silently</strong>. To reproduce the case where two distinct ports are
+indistinguishable, create two loopbacks whose <strong>first 31 characters match</strong>:</p>
+<pre class="code powershell"><code class="powershell">&amp; $midi basic-loopback create --name &quot;Reloj Bitwig ñ prueba de longitud&quot;
+&amp; $midi basic-loopback create --name &quot;Reloj Bitwig ñ prueba de longitud DOS&quot;
+</code></pre>
+<p>The first is 33 characters, the second 37; both truncate to
+<code>Reloj Bitwig ñ prueba de longit</code>. In <code>MIDIINCAPSW</code>/<code>MIDIOUTCAPSW</code> they come back
+<strong>identical field by field</strong>: same name, same <code>wMid</code> (1), same <code>wPid</code> (25 for
+inputs, 26 for outputs), same <code>vDriverVersion</code>, same <code>wTechnology</code>. Only the
+index separates them.</p>
+<p>If you change the names, keep the character counts working — the recipe depends
+on one being longer than 31 and both agreeing up to that point.</p>
+<p>The truncation happens <strong>upstream of WinMM</strong>: <code>midi enumerate midi-services-endpoints</code> shows the service already holding the 31-character name.
+Whether the console or the service truncates was not determined; for the gem it
+makes no difference.</p>
+<p>The <code>ñ</code> survives intact (<code>U+00F1</code> in the UTF-16LE dump), which is what validates
+the <strong>W</strong> entry points against a genuinely non-ASCII character.</p>
+<h2 id="5__Removing">5. Removing</h2>
+<pre class="code powershell"><code class="powershell">&amp; $midi basic-loopback remove --association-id &quot;{bfba125e-3aca-446c-9b94-692a70153034}&quot;
+</code></pre>
+<p><strong>The braces around the GUID are required.</strong> <code>list</code> prints the id without them;
+they have to be added.</p>
+<p>Afterwards, check the machine is back where it started — with <code>list</code>, and better
+still by enumerating through WinMM: with no loopbacks there should be <strong>0 inputs
+and 1 output</strong>.</p>
+<h2 id="6__What_this_setup_can_test__and_what_it_cannot">6. What this setup can test, and what it cannot</h2>
+<p>Exercised with it, and working: enumeration with colliding names, short messages
+in all three lengths (3, 2 and 1 bytes), accumulation in <code>gets</code>, System Exclusive
+both ways at 200, 3000 and 5000 bytes, buffer recycling, closing and reopening,
+and the propagation of an error from opening a port.</p>
+<p><strong>Not testable with this setup</strong>, and therefore still untested:</p>
+<ul>
+<li><strong><code>SYSEX_TIMEOUT</code> / <code>Output#wait_until_sent</code>.</strong> The only real output device is
+the <em>GS Wavetable Synth</em>, a software synthesiser that marks <code>MHDR_DONE</code> in
+under a millisecond because there is no wire. This needs a physical interface.</li>
+<li><strong><code>RESET_TIMEOUT</code> / <code>Input#await_returned_buffers</code>.</strong> It never came close:
+closes took between 4 and 21 ms against a one-second bound. The
+device-went-away path needs something to unplug.</li>
+<li><strong>Renumbering in <code>Device.enumerate</code>.</strong> Needs a port to actually appear or go.</li>
+<li><strong><code>MM_MIM_LONGERROR</code>.</strong> None could be provoked, not even with a System
+Exclusive message larger than the entire buffer queue. The code handling it is
+unexercised — its presence has been shown harmless, which is not the same
+thing.</li>
+<li><strong>That an input and an output of the same device share a name.</strong> Established
+for a loopback, where they are literally the same device. Not for a real USB
+interface.</li>
+<li><strong>Any measurement of time.</strong></li>
+</ul>
+<p>Those are the items a session with real hardware should close.</p>
+<h2 id="7__One_finding_from_here_worth_not_forgetting">7. One finding from here worth not forgetting</h2>
+<p>Multi-client access <strong>follows the endpoint, not the API</strong>. Two WinMM clients on
+the same BLOOP input both work and <strong>both receive every message</strong>. The <em>GS
+Wavetable Synth</em>, which belongs to the classic <code>wdmaud</code> stack, refuses the second
+open with <em>&quot;The specified device is already in use.&quot;</em> So on one machine, through
+one API, shareable ports and exclusive ports coexist.</p></div></div>
+
+      <div id="footer">
+  Generated on Sun Sep  6 21:19:08 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-3.4.7).
+</div>
+
+    </div>
+  </body>
+</html>
