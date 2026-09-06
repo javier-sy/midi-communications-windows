@@ -37,10 +37,14 @@ require_relative 'midi-communications-windows/version'
 #
 # Windows MIDI Services, generally available in Windows 11 since then, replaced
 # the MIDI stack underneath. The existing MIDI 1.0 APIs were reconnected to the
-# new service rather than retired, so a WinMM client stopped holding ports
-# exclusively, gained multi-client access, and can see the loopback endpoints
-# the system now provides itself. It also needs nothing installed to get any of
-# that. On Windows 10 WinMM behaves as it always did.
+# new service rather than retired, so a WinMM client reaches what the new stack
+# offers with nothing installed — including the loopback endpoints the system
+# now creates itself, which used to need a third-party driver.
+#
+# Whether a port can be opened by more than one program at a time follows the
+# endpoint, not the API. Measured: two clients shared a loopback input and both
+# received every message, while a second open of a classic `wdmaud` device was
+# refused as already in use. On Windows 10 there is no Windows MIDI Services.
 #
 # The new App SDK offers MIDI 2.0 and UMP, which this library does not need —
 # `midi-communications` and MusaDSL are MIDI 1.0 throughout — and it is

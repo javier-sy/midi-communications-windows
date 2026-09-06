@@ -21,29 +21,25 @@ This library is part of a suite of Ruby libraries for MIDI:
 
 ## Status
 
-**Work in progress.** All of it is written; none of it has been run as a whole.
+**Early.** Everything is written and has been exercised end to end on Windows 11
+25H2 against system loopback endpoints: enumeration, short messages in both
+directions, System Exclusive in both directions including a message larger than
+the whole buffer queue, twenty open/close cycles, and the error path. What has
+not been exercised is anything needing real hardware — a physical interface slow
+enough to make `Output`'s System Exclusive wait mean something, and a port
+appearing or disappearing while the program runs.
 
-| | |
-| --- | --- |
-| Enumerating ports | written; enumeration verified on Windows 11 25H2 |
-| Sending short messages | written; message packing verified against WinMM |
-| Sending System Exclusive | written, not yet exercised |
-| Receiving, including System Exclusive | written, not yet exercised as a whole |
+The version says 0.0.1 because that is a virtual machine with no MIDI hardware
+in it, not because anything is known to be missing.
 
-Every mechanism the receiving path rests on was measured working on Windows 11
-25H2 against a system loopback: `CALLBACK_THREAD` delivery, the parameters each
-notification carries, recycling a System Exclusive buffer from inside the reader
-thread's own message loop, fragmentation across buffers, and the closing
-sequence. What has not been run is this library's assembly of them.
+### One thing worth knowing before you use it
 
-Receiving takes input through `CALLBACK_THREAD`, where WinMM posts to the
-message queue of a thread this library owns, rather than `CALLBACK_FUNCTION`,
-where the driver's own thread calls into Ruby. Both were measured working, so it
-is a design choice: the second lets a Ruby callback wait on the GVL while a
-driver thread waits on the callback, which is not hypothetical — it produced
-duplicate MIDI deliveries with the send reporting an error. `CALLBACK_THREAD`
-makes that impossible rather than guarding against it. See the notes in
-`lib/midi-communications-windows/api.rb` and `input.rb`.
+`Input#gets` **waits**. It does not return an empty array when nothing has
+arrived; it blocks until something does, and then returns everything that
+accumulated. Calling it on a quiet port looks exactly like a hung program. That
+is deliberate — `Musa::Clock::InputMidiClock` reads in a loop with no delay of
+its own and relies on it — but it will surprise anyone arriving from an API that
+polls.
 
 ## Requirements
 
@@ -71,13 +67,20 @@ Otherwise
 Windows has three MIDI APIs a program could reach for, and as of February 2026
 the oldest is the right one for Ruby.
 
-**Windows MIDI Services** became generally available in Windows 11 that month,
-replacing the MIDI stack underneath. Rather than retiring the older APIs,
-Microsoft reconnected them to the new service. A WinMM client therefore stopped
-holding ports exclusively, gained multi-client access, and can see the loopback
-endpoints the system now provides itself — with nothing to install. On Windows
-10 WinMM behaves as it always did, and a third-party loopback driver is still
-needed to route MIDI between applications.
+**Windows MIDI Services** became generally available in Windows 11 in February
+2026, replacing the MIDI stack underneath. Rather than retiring the older APIs,
+Microsoft reconnected them to the new service, so a WinMM client needs nothing
+installed to reach what the new stack provides — including the loopback
+endpoints the system now creates itself, which is what previously required a
+third-party driver.
+
+Multi-client access arrives the same way, but **per endpoint, not per API**.
+Measured on Windows 11 25H2 through this library: two clients opened the same
+loopback input at once and both received every message, while a second open of
+the classic `wdmaud` software synthesiser was refused with "The specified device
+is already in use". Endpoints carried by the new transports are shared;
+endpoints still on the old drivers are exclusive, as they always were. On
+Windows 10 there is no Windows MIDI Services at all.
 
 **The Windows MIDI Services App SDK** offers MIDI 2.0 and UMP, neither of which
 this library needs: `midi-communications` and MusaDSL are MIDI 1.0 throughout.

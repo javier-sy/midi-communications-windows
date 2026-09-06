@@ -102,10 +102,13 @@ enumerates both.</p>
 of February 2026 it is also the most sensible choice for Ruby.</p>
 <p>Windows MIDI Services, generally available in Windows 11 since then, replaced
 the MIDI stack underneath. The existing MIDI 1.0 APIs were reconnected to the
-new service rather than retired, so a WinMM client stopped holding ports
-exclusively, gained multi-client access, and can see the loopback endpoints
-the system now provides itself. It also needs nothing installed to get any of
-that. On Windows 10 WinMM behaves as it always did.</p>
+new service rather than retired, so a WinMM client reaches what the new stack
+offers with nothing installed — including the loopback endpoints the system
+now creates itself, which used to need a third-party driver.</p>
+<p>Whether a port can be opened by more than one program at a time follows the
+endpoint, not the API. Measured: two clients shared a loopback input and both
+received every message, while a second open of a classic <code>wdmaud</code> device was
+refused as already in use. On Windows 10 there is no Windows MIDI Services.</p>
 <p>The new App SDK offers MIDI 2.0 and UMP, which this library does not need —
 <code>midi-communications</code> and MusaDSL are MIDI 1.0 throughout — and it is
 published only as WinRT. Microsoft's own guidance is that other languages
@@ -181,7 +184,7 @@ RubyGems is where installations break; there is nothing here to break.</p>
 
 </div>
         </dt>
-        <dd><pre class="code"><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>0.0.1</span><span class='tstring_end'>&#39;</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+        <dd><pre class="code"><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>0.0.2</span><span class='tstring_end'>&#39;</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
       
     </dl>
   
@@ -197,7 +200,7 @@ RubyGems is where installations break; there is nothing here to break.</p>
 </div>
 
       <div id="footer">
-  Generated on Sun Sep  6 20:09:25 2026 by
+  Generated on Sun Sep  6 20:31:39 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-3.4.7).
 </div>

@@ -350,6 +350,8 @@ module MIDICommunicationsWindows
           case message[:message]
           when API::MM_MIM_DATA then deliver_short(message[:lParam])
           when API::MM_MIM_LONGDATA then deliver_long(message[:lParam])
+          when API::MM_MIM_LONGERROR then discard_long(message[:lParam])
+          when API::MM_MIM_ERROR then report_invalid(message[:lParam])
           end
         rescue StandardError => e
           # One bad message must not end the loop. A reader thread that dies
@@ -395,6 +397,45 @@ module MIDICommunicationsWindows
       enqueue_sysex(header[:lpData].read_array_of_uint8(recorded), Time.now.to_f)
 
       requeue(header)
+    end
+
+    # A System Exclusive buffer WinMM could not fill: the data in it is invalid.
+    #
+    # This has never been observed — sending a message larger than the whole
+    # buffer queue did not provoke one — and it is handled anyway because of the
+    # shape its failure would take rather than its likelihood. A fragment lost
+    # mid-message means {#enqueue_sysex} never sees the 0xF7 that ends it, so it
+    # would hold every later fragment too and {#gets} would wait forever. That
+    # reads as a hung program, not as a corrupt message.
+    #
+    # So the partial message is abandoned, loudly, and the buffer goes back into
+    # the queue. One message is lost, which is what actually happened.
+    #
+    # @param header_pointer [Integer] address of a `MIDIHDR`
+    # @return [void]
+    # @api private
+    def discard_long(header_pointer)
+      header = API::MIDIHdr.new(FFI::Pointer.new(header_pointer))
+
+      unless @sysex.empty?
+        warn "[midi-communications-windows] #{@name}: discarding #{@sysex.size} bytes of an " \
+             'incomplete System Exclusive message after a device error'
+        @sysex.clear
+      end
+
+      requeue(header) unless header[:dwBytesRecorded].zero?
+    end
+
+    # Invalid MIDI data arrived; `lParam` holds what WinMM made of it.
+    #
+    # There is nothing to hand on and nothing to recycle, but staying silent
+    # about a port emitting bytes that are not MIDI helps nobody.
+    #
+    # @param word [Integer]
+    # @return [void]
+    # @api private
+    def report_invalid(word)
+      warn format('[midi-communications-windows] %s: ignoring invalid MIDI data 0x%08X', @name, word & 0xFFFF_FFFF)
     end
 
     # Gives a buffer back to WinMM so it can be filled again.

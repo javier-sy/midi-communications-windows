@@ -127,11 +127,14 @@ module MIDICommunicationsWindows
     # finish with it, then unprepare. Unpreparing early fails with
     # `MIDIERR_STILLPLAYING`, and freeing the buffer early is worse than that.
     #
-    # The wait is a real one. MIDI runs at 31250 baud, so a byte takes about
-    # 320 microseconds and a 200-byte dump takes something like 64 milliseconds
-    # during which this method does not return. That is a property of the wire,
-    # not of this implementation, but a caller sending System Exclusive from a
-    # sequencer thread should know it is there.
+    # The wait can be a real one. MIDI runs at 31250 baud, so on a physical
+    # interface a byte takes about 320 microseconds and a 200-byte dump should
+    # occupy something like 64 milliseconds during which this method does not
+    # return — a caller sending System Exclusive from a sequencer thread should
+    # know that is possible. Said as arithmetic rather than as measurement: the
+    # only device this has been run against is a software synthesiser, which
+    # marks the buffer done at once because there is no wire, and returned in
+    # well under a millisecond.
     #
     # @param data [Array<Integer>] the whole message, 0xF0 through 0xF7
     # @return [void]
