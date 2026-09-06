@@ -81,27 +81,6 @@ Otherwise
 
 [rdoc](https://www.rubydoc.info/gems/midi-communications-windows)
 
-## Replaces midi-winmm
-
-Until now [MIDI Communications](https://github.com/javier-sy/midi-communications)
-reached Windows through [midi-winmm](http://github.com/arirusso/midi-winmm), last
-released in 2011 and unusable on a 64-bit Ruby. This is a new implementation,
-written from Microsoft's documentation rather than derived from that one, and it
-is what `midi-communications` uses on Windows from version 0.7.1.
-
-## Notes for contributors
-
-Why this binds WinMM rather than one of the newer Windows MIDI APIs, why it is a
-direct binding rather than a wrapper around an existing C library, and why the
-model has holes where the macOS layer does not, are in
-[`dev/design-notes.md`](https://github.com/javier-sy/midi-communications-windows/blob/master/dev/design-notes.md).
-
-How the measurements above were taken, and how to rebuild the environment they
-were taken in, are in
-[`dev/testing-on-windows.md`](https://github.com/javier-sy/midi-communications-windows/blob/master/dev/testing-on-windows.md).
-
-Neither is part of the published gem, which is why those are links and not paths.
-
 ## Author
 
 * [Javier Sánchez Yeste](https://github.com/javier-sy)

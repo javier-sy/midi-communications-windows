@@ -152,21 +152,6 @@ API newer than WinMM — but older versions are untested.</p>
 <p><code>gem install midi-communications-windows</code></p>
 <h2 id="Documentation">Documentation</h2>
 <p><a href="https://www.rubydoc.info/gems/midi-communications-windows">rdoc</a></p>
-<h2 id="Replaces_midi_winmm">Replaces midi-winmm</h2>
-<p>Until now <a href="https://github.com/javier-sy/midi-communications">MIDI Communications</a>
-reached Windows through <a href="http://github.com/arirusso/midi-winmm">midi-winmm</a>, last
-released in 2011 and unusable on a 64-bit Ruby. This is a new implementation,
-written from Microsoft's documentation rather than derived from that one, and it
-is what <code>midi-communications</code> uses on Windows from version 0.7.1.</p>
-<h2 id="Notes_for_contributors">Notes for contributors</h2>
-<p>Why this binds WinMM rather than one of the newer Windows MIDI APIs, why it is a
-direct binding rather than a wrapper around an existing C library, and why the
-model has holes where the macOS layer does not, are in
-<a href="https://github.com/javier-sy/midi-communications-windows/blob/master/dev/design-notes.md"><code>dev/design-notes.md</code></a>.</p>
-<p>How the measurements above were taken, and how to rebuild the environment they
-were taken in, are in
-<a href="https://github.com/javier-sy/midi-communications-windows/blob/master/dev/testing-on-windows.md"><code>dev/testing-on-windows.md</code></a>.</p>
-<p>Neither is part of the published gem, which is why those are links and not paths.</p>
 <h2 id="Author">Author</h2>
 <ul>
 <li><a href="https://github.com/javier-sy">Javier Sánchez Yeste</a></li>
@@ -175,7 +160,7 @@ were taken in, are in
 <p><a href="https://github.com/javier-sy/midi-communications-windows">MIDI Communications Windows Layer</a> Copyright (c) 2026 <a href="https://yeste.studio">Javier Sánchez Yeste</a>, licensed under LGPL 3.0 License</p></div></div>
 
       <div id="footer">
-  Generated on Mon Sep  7 01:13:16 2026 by
+  Generated on Mon Sep  7 01:15:22 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-3.4.7).
 </div>
