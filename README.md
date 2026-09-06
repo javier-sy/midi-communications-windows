@@ -39,8 +39,7 @@ Runnable examples of the API are in [`examples/`](examples).
 ## Status
 
 **Early.** Tested on Windows 11 without external MIDI devices. Everything works
-against loopback ports; running it against real hardware is still pending, and
-that is why it is in the 0.0.x series.
+against loopback ports; running it against real hardware is still pending.
 
 ## Requirements
 
