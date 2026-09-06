@@ -104,121 +104,114 @@
 </tbody>
 </table>
 <h2 id="Status">Status</h2>
-<p><strong>Early.</strong> Everything is written and has been exercised end to end on Windows 11
-25H2 against system loopback endpoints: enumeration, short messages in both
-directions, System Exclusive in both directions including a message larger than
-the whole buffer queue, twenty open/close cycles, and the error path. What has
-not been exercised is anything needing real hardware — a physical interface slow
-enough to make <code>Output</code>'s System Exclusive wait mean something, and a port
-appearing or disappearing while the program runs.</p>
-<p>The version stays in the 0.0.x series because that was a virtual machine with no
-MIDI hardware in it, not because anything is known to be missing.</p>
-<p>How those measurements were taken, and what a session with real hardware still
-has to close, is written down in
-<a href="dev/testing-on-windows.md"><code>dev/testing-on-windows.md</code></a>.</p>
-<h3 id="One_thing_worth_knowing_before_you_use_it">One thing worth knowing before you use it</h3>
-<p><code>Input#gets</code> <strong>waits</strong>. It does not return an empty array when nothing has
-arrived; it blocks until something does, and then returns everything that
-accumulated. Calling it on a quiet port looks exactly like a hung program. That
-is deliberate — <code>Musa::Clock::InputMidiClock</code> reads in a loop with no delay of
-its own and relies on it — but it will surprise anyone arriving from an API that
-polls.</p>
+<p><strong>Early.</strong> Enumeration, sending, receiving and System Exclusive in both
+directions all work, and have been exercised on Windows 11 25H2.</p>
+<p>Not yet exercised, all of it for want of a physical MIDI interface:</p>
+<ul>
+<li>the timeout on a System Exclusive send that never completes;</li>
+<li>the timeout on closing a port whose device has gone away;</li>
+<li>ports being renumbered when one is plugged in or unplugged;</li>
+<li>whether an input and an output of the same device report the same name;</li>
+<li>the handling of a device error during System Exclusive input.</li>
+</ul>
+<p>It is in the 0.0.x series for that reason, not because anything is known to be
+missing.</p>
 <h2 id="Requirements">Requirements</h2>
 <ul>
 <li><a href="http://github.com/ffi/ffi">ffi</a></li>
 </ul>
-<p>Nothing else. <code>winmm.dll</code> is part of Windows, so this gem binds a library that
-is already on the machine and ships no compiled artifact of its own.</p>
-<h3 id="Which_versions_of_Windows">Which versions of Windows</h3>
-<p><strong>By construction, old ones.</strong> Everything this gem calls is the oldest MIDI API
-Windows has — <code>midiInOpen</code>, <code>midiOutShortMsg</code>, <code>midiOutLongMsg</code> and their
-neighbours — plus three functions for a thread's message queue, <code>GetMessageW</code>,
-<code>PeekMessageW</code> and <code>PostThreadMessageW</code>. All of it, the Unicode entry points
-included, dates from the NT era. Nothing here calls Windows MIDI Services, which
-means nothing here needs Windows 11.</p>
-<p>What changes on an older system is not whether the gem works but what the
-platform gives it. Before Windows MIDI Services a MIDI port is <strong>exclusive</strong> —
-one program at a time — and there are no system loopback endpoints, so routing
-MIDI between applications on one machine needs a third-party driver such as
-loopMIDI. The same code, a poorer platform.</p>
-<p>A 32-bit Ruby should also be fine: the two size checks that only hold on 64-bit
-Windows are guarded, and the two that are checked everywhere describe structures
-whose layout does not depend on the word size.</p>
-<p><strong>None of which has been run.</strong> The only system this has ever executed on is
-Windows 11 25H2, in a virtual machine, on an x64 Ruby under ARM emulation. The
-paragraphs above say what the code asks of Windows, not what has been observed;
-treat them as a reason to expect it to work rather than as a report that it does.</p>
-<p>Where the floor actually sits is a question about Ruby, not about this gem:
-RubyInstaller recommends Windows 10 or 11 and publishes no hard cutoff.</p>
+<p>Nothing else. <code>winmm.dll</code> is part of Windows, so this gem binds a library that is
+already on the machine and ships no compiled artifact of its own.</p>
+<p>It has only been run on Windows 11. Nothing in it needs Windows 11 — it calls no
+API newer than WinMM — but older versions are untested.</p>
 <h2 id="Installation">Installation</h2>
 <p>If you're using Bundler, add this line to your application's Gemfile:</p>
 <p><code>gem &quot;midi-communications-windows&quot;</code></p>
 <p>Otherwise</p>
 <p><code>gem install midi-communications-windows</code></p>
-<h2 id="Documentation">Documentation</h2>
-<p><a href="http://rubydoc.info/github/javier-sy/midi-communications-windows">rdoc</a></p>
-<h2 id="Why_WinMM_and_not_one_of_the_newer_Windows_MIDI_APIs">Why WinMM and not one of the newer Windows MIDI APIs</h2>
-<p>Windows has three MIDI APIs a program could reach for, and as of February 2026
-the oldest is the right one for Ruby.</p>
-<p><strong>Windows MIDI Services</strong> became generally available in Windows 11 in February
-2026, replacing the MIDI stack underneath. Rather than retiring the older APIs,
-Microsoft reconnected them to the new service, so a WinMM client needs nothing
-installed to reach what the new stack provides — including the loopback
-endpoints the system now creates itself, which is what previously required a
-third-party driver.</p>
-<p>Multi-client access arrives the same way, but <strong>per endpoint, not per API</strong>.
-Measured on Windows 11 25H2 through this library: two clients opened the same
-loopback input at once and both received every message, while a second open of
-the classic <code>wdmaud</code> software synthesiser was refused with &quot;The specified device
-is already in use&quot;. Endpoints carried by the new transports are shared;
-endpoints still on the old drivers are exclusive, as they always were. On
-Windows 10 there is no Windows MIDI Services at all.</p>
-<p><strong>The Windows MIDI Services App SDK</strong> offers MIDI 2.0 and UMP, neither of which
-this library needs: <code>midi-communications</code> and MusaDSL are MIDI 1.0 throughout.
-It is published only as WinRT, and Microsoft's guidance is that other languages
-obtain a WinRT projection from their toolchain. Ruby has none.</p>
-<p><strong>WinRT <code>Windows.Devices.Midi</code></strong> is, under the new stack, another compatibility
-layer onto the same service. It offers what WinMM offers, in exchange for
-hand-written COM.</p>
-<h2 id="Differences_from_the_macOS_layer">Differences from the macOS layer</h2>
-<p>The two libraries implement the same contract over platforms that do not have
-the same shape. Where they differ, they differ because the platforms do:</p>
+<h2 id="Usage">Usage</h2>
+<p>You will usually not use this gem directly.
+<a href="https://github.com/javier-sy/midi-communications">MIDI Communications</a> depends
+on it and selects it on Windows, so code written against that gem runs unchanged
+on macOS and Windows.</p>
+<p>Used directly, it looks like this.</p>
+<h3 id="Listing_ports">Listing ports</h3>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>midi-communications-windows</span><span class='tstring_end'>&#39;</span></span>
+
+<span class='const'><span class='object_link'><a href="MIDICommunicationsWindows.html" title="MIDICommunicationsWindows (module)">MIDICommunicationsWindows</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="MIDICommunicationsWindows/Device.html" title="MIDICommunicationsWindows::Device (module)">Device</a></span></span><span class='period'>.</span><span class='id identifier rubyid_all_by_type'><span class='object_link'><a href="MIDICommunicationsWindows/Device.html#all_by_type-class_method" title="MIDICommunicationsWindows::Device.all_by_type (method)">all_by_type</a></span></span><span class='lbracket'>[</span><span class='symbol'>:output</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_port'>port</span><span class='op'>|</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_id'>id</span><span class='embexpr_end'>}</span><span class='tstring_content'>: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+</code></pre>
+<h3 id="Sending">Sending</h3>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_output'>output</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="MIDICommunicationsWindows.html" title="MIDICommunicationsWindows (module)">MIDICommunicationsWindows</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="MIDICommunicationsWindows/Output.html" title="MIDICommunicationsWindows::Output (class)">Output</a></span></span><span class='period'>.</span><span class='id identifier rubyid_first'><span class='object_link'><a href="MIDICommunicationsWindows/Device/ClassMethods.html#first-instance_method" title="MIDICommunicationsWindows::Device::ClassMethods#first (method)">first</a></span></span>
+
+<span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_port'>port</span><span class='op'>|</span>
+  <span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span><span class='lparen'>(</span><span class='int'>0x90</span><span class='comma'>,</span> <span class='int'>60</span><span class='comma'>,</span> <span class='int'>100</span><span class='rparen'>)</span>   <span class='comment'># Note On, middle C
+</span>  <span class='id identifier rubyid_sleep'>sleep</span> <span class='float'>0.5</span>
+  <span class='id identifier rubyid_port'>port</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span><span class='lparen'>(</span><span class='int'>0x80</span><span class='comma'>,</span> <span class='int'>60</span><span class='comma'>,</span> <span class='int'>0</span><span class='rparen'>)</span>     <span class='comment'># Note Off
+</span><span class='kw'>end</span>
+</code></pre>
+<p><code>puts</code> also takes an array of bytes, a hex string, or a System Exclusive message:</p>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='int'>0x90</span><span class='comma'>,</span> <span class='int'>60</span><span class='comma'>,</span> <span class='int'>100</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>903C64</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+<span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='int'>0xF0</span><span class='comma'>,</span> <span class='int'>0x41</span><span class='comma'>,</span> <span class='int'>0x10</span><span class='comma'>,</span> <span class='int'>0x42</span><span class='comma'>,</span> <span class='int'>0x12</span><span class='comma'>,</span> <span class='int'>0xF7</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+</code></pre>
+<h3 id="Receiving">Receiving</h3>
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_input'>input</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="MIDICommunicationsWindows.html" title="MIDICommunicationsWindows (module)">MIDICommunicationsWindows</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="MIDICommunicationsWindows/Input.html" title="MIDICommunicationsWindows::Input (class)">Input</a></span></span><span class='period'>.</span><span class='id identifier rubyid_first'><span class='object_link'><a href="MIDICommunicationsWindows/Device/ClassMethods.html#first-instance_method" title="MIDICommunicationsWindows::Device::ClassMethods#first (method)">first</a></span></span><span class='period'>.</span><span class='id identifier rubyid_open'><span class='object_link'><a href="MIDICommunicationsWindows/Device/InstanceMethods.html#open-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#open (method)">open</a></span></span>
+
+<span class='id identifier rubyid_loop'>loop</span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_input'>input</span><span class='period'>.</span><span class='id identifier rubyid_gets'>gets</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_message'>message</span><span class='op'>|</span>
+    <span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_message'>message</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span>
+    <span class='comment'># =&gt; {:data=&gt;[144, 60, 100], :timestamp=&gt;1789123456.789}
+</span>  <span class='kw'>end</span>
+<span class='kw'>end</span>
+</code></pre>
+<p><strong><code>gets</code> waits.</strong> It does not return an empty array when nothing has arrived; it
+blocks until something does, and then returns every message that accumulated. On
+a quiet port that looks exactly like a hung program. It is deliberate — a reader
+loop needs no delay of its own, and adding one only delays messages that are
+already waiting — but it will surprise anyone arriving from an API that polls.</p>
+<p>More in <a href="examples"><code>examples/</code></a>.</p>
+<h2 id="What_MIDI_on_Windows_will_not_give_you">What MIDI on Windows will not give you</h2>
+<p>Behaviour that differs from the macOS layer, and that you may run into:</p>
 <ul>
-<li><strong><code>manufacturer</code> and <code>model</code> are <code>nil</code>.</strong> WinMM reports <code>wMid</code> and <code>wPid</code>,
-numeric codes from a manufacturer registry that stopped being maintained in
-the 1990s and that class-compliant USB devices almost all answer with
-Microsoft's. Core MIDI reports real strings. Inventing text from the codes
-would describe the code table, not the hardware.</li>
-<li><strong><code>display_name</code> is the port name.</strong> On macOS it is composed as
-&quot;manufacturer model (name)&quot;, which here would be a name wrapped in the
-punctuation of two absent fields.</li>
-<li><strong>Port ids are unique within a direction, not across both.</strong> A WinMM port is
-identified by its index among inputs or among outputs, and that index is what
-is passed to <code>midiInOpen</code>. Core MIDI numbers endpoints of both directions from
-one counter. Input 0 and output 0 are both valid here, and unrelated.</li>
+<li><strong><code>manufacturer</code> and <code>model</code> are always <code>nil</code>.</strong> Windows reports numeric codes
+rather than names, and no honest string can be derived from them. Code that
+filters on either will match nothing.</li>
+<li><strong>A port's <code>id</code> is unique within its direction, not across both.</strong> Input 0 and
+output 0 are different ports and both are valid.</li>
 <li><strong>Port names are truncated to 31 characters, and do not identify a port.</strong>
-That is all WinMM stores, and it drops the rest silently. Two loopback
-endpoints whose names differed only past character 31 came back identical in
-every field of <code>MIDIINCAPSW</code> — same name, same <code>wMid</code>, same <code>wPid</code>, same
-<code>wTechnology</code> — distinguishable only by index. Core MIDI names are neither
-truncated nor, in practice, ambiguous.</li>
-<li><strong>Enumeration is not cached, but wrappers are reused.</strong> The macOS layer reads
-the device list once and keeps it, so a device plugged in later is never seen.
-Here WinMM is asked on every call, and a port still present comes back as the
-same object it was before, so opening a port and then reading from it works
-whether or not the caller kept the reference.</li>
-<li><strong>There is no packet-list parsing.</strong> Core MIDI delivers a list of packets that
-has to be walked; WinMM delivers one complete short message at a time, with
-running status already resolved by the driver.</li>
+Windows stores no more and drops the rest silently, so two ports whose names
+differ only past that point arrive indistinguishable in everything Windows
+reports about them except their index. Where it matters, select by <code>id</code>:
+<code>find_by_name</code> can only answer with the first match.</li>
+<li><strong>Whether two programs can open the same port depends on the port</strong>, not on
+this library. Under Windows MIDI Services, on Windows 11, ports carried by the
+new transports are shared; ports still on the older drivers are exclusive, as
+they always were, and so is everything on Windows 10.</li>
+<li><strong>Routing MIDI between applications on one machine has to be set up.</strong> Windows
+has no equivalent of the IAC bus macOS provides. On Windows 11 the Windows MIDI
+Services tools — a separate download — can create loopback endpoints, which
+this library then sees as ordinary ports; otherwise a third-party driver such
+as loopMIDI does the same job.</li>
 </ul>
-<h2 id="Relationship_to_midi_winmm">Relationship to midi-winmm</h2>
-<p>This library is <strong>not</strong> derived from <a href="http://github.com/arirusso/midi-winmm">midi-winmm</a>,
-which was written in 2011 for 32-bit Ruby. Windows is LLP64: on a 64-bit Ruby,
-<code>unsigned long</code> is 32 bits while a <code>HANDLE</code> is 64, so that library's
-<code>typedef :ulong, :HANDLE</code> truncates every handle it obtains. It also reads port
-names through the ANSI entry points, which mangle any name that is not ASCII.
-Both are addressed here by construction; see the notes in
-<code>lib/midi-communications-windows/api.rb</code>.</p>
+<h2 id="Documentation">Documentation</h2>
+<p><a href="https://www.rubydoc.info/gems/midi-communications-windows">rdoc</a></p>
+<h2 id="Replaces_midi_winmm">Replaces midi-winmm</h2>
+<p>Until now <a href="https://github.com/javier-sy/midi-communications">MIDI Communications</a>
+reached Windows through <a href="http://github.com/arirusso/midi-winmm">midi-winmm</a>, last
+released in 2011 and unusable on a 64-bit Ruby. This is a new implementation,
+written from Microsoft's documentation rather than derived from that one, and it
+is what <code>midi-communications</code> uses on Windows from version 0.7.1.</p>
+<h2 id="Notes_for_contributors">Notes for contributors</h2>
+<p>Why this binds WinMM rather than one of the newer Windows MIDI APIs, why it is a
+direct binding rather than a wrapper around an existing C library, and what each
+of those choices cost, are in
+<a href="https://github.com/javier-sy/midi-communications-windows/blob/master/dev/design-notes.md"><code>dev/design-notes.md</code></a>.</p>
+<p>How the measurements above were taken, and how to rebuild the environment they
+were taken in, are in
+<a href="https://github.com/javier-sy/midi-communications-windows/blob/master/dev/testing-on-windows.md"><code>dev/testing-on-windows.md</code></a>.</p>
+<p>Neither is part of the published gem, which is why those are links and not paths.</p>
 <h2 id="Author">Author</h2>
 <ul>
 <li><a href="https://github.com/javier-sy">Javier Sánchez Yeste</a></li>
@@ -227,7 +220,7 @@ Both are addressed here by construction; see the notes in
 <p><a href="https://github.com/javier-sy/midi-communications-windows">MIDI Communications Windows Layer</a> Copyright (c) 2026 <a href="https://yeste.studio">Javier Sánchez Yeste</a>, licensed under LGPL 3.0 License</p></div></div>
 
       <div id="footer">
-  Generated on Mon Sep  7 00:14:18 2026 by
+  Generated on Mon Sep  7 01:11:02 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-3.4.7).
 </div>

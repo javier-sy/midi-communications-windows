@@ -21,63 +21,29 @@ This library is part of a suite of Ruby libraries for MIDI:
 
 ## Status
 
-**Early.** Everything is written and has been exercised end to end on Windows 11
-25H2 against system loopback endpoints: enumeration, short messages in both
-directions, System Exclusive in both directions including a message larger than
-the whole buffer queue, twenty open/close cycles, and the error path. What has
-not been exercised is anything needing real hardware — a physical interface slow
-enough to make `Output`'s System Exclusive wait mean something, and a port
-appearing or disappearing while the program runs.
+**Early.** Enumeration, sending, receiving and System Exclusive in both
+directions all work, and have been exercised on Windows 11 25H2.
 
-The version stays in the 0.0.x series because that was a virtual machine with no
-MIDI hardware in it, not because anything is known to be missing.
+Not yet exercised, all of it for want of a physical MIDI interface:
 
-How those measurements were taken, and what a session with real hardware still
-has to close, is written down in
-[`dev/testing-on-windows.md`](dev/testing-on-windows.md).
+* the timeout on a System Exclusive send that never completes;
+* the timeout on closing a port whose device has gone away;
+* ports being renumbered when one is plugged in or unplugged;
+* whether an input and an output of the same device report the same name;
+* the handling of a device error during System Exclusive input.
 
-### One thing worth knowing before you use it
-
-`Input#gets` **waits**. It does not return an empty array when nothing has
-arrived; it blocks until something does, and then returns everything that
-accumulated. Calling it on a quiet port looks exactly like a hung program. That
-is deliberate — `Musa::Clock::InputMidiClock` reads in a loop with no delay of
-its own and relies on it — but it will surprise anyone arriving from an API that
-polls.
+It is in the 0.0.x series for that reason, not because anything is known to be
+missing.
 
 ## Requirements
 
 * [ffi](http://github.com/ffi/ffi)
 
-Nothing else. `winmm.dll` is part of Windows, so this gem binds a library that
-is already on the machine and ships no compiled artifact of its own.
+Nothing else. `winmm.dll` is part of Windows, so this gem binds a library that is
+already on the machine and ships no compiled artifact of its own.
 
-### Which versions of Windows
-
-**By construction, old ones.** Everything this gem calls is the oldest MIDI API
-Windows has — `midiInOpen`, `midiOutShortMsg`, `midiOutLongMsg` and their
-neighbours — plus three functions for a thread's message queue, `GetMessageW`,
-`PeekMessageW` and `PostThreadMessageW`. All of it, the Unicode entry points
-included, dates from the NT era. Nothing here calls Windows MIDI Services, which
-means nothing here needs Windows 11.
-
-What changes on an older system is not whether the gem works but what the
-platform gives it. Before Windows MIDI Services a MIDI port is **exclusive** —
-one program at a time — and there are no system loopback endpoints, so routing
-MIDI between applications on one machine needs a third-party driver such as
-loopMIDI. The same code, a poorer platform.
-
-A 32-bit Ruby should also be fine: the two size checks that only hold on 64-bit
-Windows are guarded, and the two that are checked everywhere describe structures
-whose layout does not depend on the word size.
-
-**None of which has been run.** The only system this has ever executed on is
-Windows 11 25H2, in a virtual machine, on an x64 Ruby under ARM emulation. The
-paragraphs above say what the code asks of Windows, not what has been observed;
-treat them as a reason to expect it to work rather than as a report that it does.
-
-Where the floor actually sits is a question about Ruby, not about this gem:
-RubyInstaller recommends Windows 10 or 11 and publishes no hard cutoff.
+It has only been run on Windows 11. Nothing in it needs Windows 11 — it calls no
+API newer than WinMM — but older versions are untested.
 
 ## Installation
 
@@ -89,80 +55,114 @@ Otherwise
 
 `gem install midi-communications-windows`
 
+## Usage
+
+You will usually not use this gem directly.
+[MIDI Communications](https://github.com/javier-sy/midi-communications) depends
+on it and selects it on Windows, so code written against that gem runs unchanged
+on macOS and Windows.
+
+Used directly, it looks like this.
+
+### Listing ports
+
+```ruby
+require 'midi-communications-windows'
+
+MIDICommunicationsWindows::Device.all_by_type[:output].each do |port|
+  puts "#{port.id}: #{port.name}"
+end
+```
+
+### Sending
+
+```ruby
+output = MIDICommunicationsWindows::Output.first
+
+output.open do |port|
+  port.puts(0x90, 60, 100)   # Note On, middle C
+  sleep 0.5
+  port.puts(0x80, 60, 0)     # Note Off
+end
+```
+
+`puts` also takes an array of bytes, a hex string, or a System Exclusive message:
+
+```ruby
+output.puts([0x90, 60, 100])
+output.puts('903C64')
+output.puts([0xF0, 0x41, 0x10, 0x42, 0x12, 0xF7])
+```
+
+### Receiving
+
+```ruby
+input = MIDICommunicationsWindows::Input.first.open
+
+loop do
+  input.gets.each do |message|
+    puts message.inspect
+    # => {:data=>[144, 60, 100], :timestamp=>1789123456.789}
+  end
+end
+```
+
+**`gets` waits.** It does not return an empty array when nothing has arrived; it
+blocks until something does, and then returns every message that accumulated. On
+a quiet port that looks exactly like a hung program. It is deliberate — a reader
+loop needs no delay of its own, and adding one only delays messages that are
+already waiting — but it will surprise anyone arriving from an API that polls.
+
+More in [`examples/`](examples).
+
+## What MIDI on Windows will not give you
+
+Behaviour that differs from the macOS layer, and that you may run into:
+
+* **`manufacturer` and `model` are always `nil`.** Windows reports numeric codes
+  rather than names, and no honest string can be derived from them. Code that
+  filters on either will match nothing.
+* **A port's `id` is unique within its direction, not across both.** Input 0 and
+  output 0 are different ports and both are valid.
+* **Port names are truncated to 31 characters, and do not identify a port.**
+  Windows stores no more and drops the rest silently, so two ports whose names
+  differ only past that point arrive indistinguishable in everything Windows
+  reports about them except their index. Where it matters, select by `id`:
+  `find_by_name` can only answer with the first match.
+* **Whether two programs can open the same port depends on the port**, not on
+  this library. Under Windows MIDI Services, on Windows 11, ports carried by the
+  new transports are shared; ports still on the older drivers are exclusive, as
+  they always were, and so is everything on Windows 10.
+* **Routing MIDI between applications on one machine has to be set up.** Windows
+  has no equivalent of the IAC bus macOS provides. On Windows 11 the Windows MIDI
+  Services tools — a separate download — can create loopback endpoints, which
+  this library then sees as ordinary ports; otherwise a third-party driver such
+  as loopMIDI does the same job.
+
 ## Documentation
 
-[rdoc](http://rubydoc.info/github/javier-sy/midi-communications-windows)
+[rdoc](https://www.rubydoc.info/gems/midi-communications-windows)
 
-## Why WinMM and not one of the newer Windows MIDI APIs
+## Replaces midi-winmm
 
-Windows has three MIDI APIs a program could reach for, and as of February 2026
-the oldest is the right one for Ruby.
+Until now [MIDI Communications](https://github.com/javier-sy/midi-communications)
+reached Windows through [midi-winmm](http://github.com/arirusso/midi-winmm), last
+released in 2011 and unusable on a 64-bit Ruby. This is a new implementation,
+written from Microsoft's documentation rather than derived from that one, and it
+is what `midi-communications` uses on Windows from version 0.7.1.
 
-**Windows MIDI Services** became generally available in Windows 11 in February
-2026, replacing the MIDI stack underneath. Rather than retiring the older APIs,
-Microsoft reconnected them to the new service, so a WinMM client needs nothing
-installed to reach what the new stack provides — including the loopback
-endpoints the system now creates itself, which is what previously required a
-third-party driver.
+## Notes for contributors
 
-Multi-client access arrives the same way, but **per endpoint, not per API**.
-Measured on Windows 11 25H2 through this library: two clients opened the same
-loopback input at once and both received every message, while a second open of
-the classic `wdmaud` software synthesiser was refused with "The specified device
-is already in use". Endpoints carried by the new transports are shared;
-endpoints still on the old drivers are exclusive, as they always were. On
-Windows 10 there is no Windows MIDI Services at all.
+Why this binds WinMM rather than one of the newer Windows MIDI APIs, why it is a
+direct binding rather than a wrapper around an existing C library, and what each
+of those choices cost, are in
+[`dev/design-notes.md`](https://github.com/javier-sy/midi-communications-windows/blob/master/dev/design-notes.md).
 
-**The Windows MIDI Services App SDK** offers MIDI 2.0 and UMP, neither of which
-this library needs: `midi-communications` and MusaDSL are MIDI 1.0 throughout.
-It is published only as WinRT, and Microsoft's guidance is that other languages
-obtain a WinRT projection from their toolchain. Ruby has none.
+How the measurements above were taken, and how to rebuild the environment they
+were taken in, are in
+[`dev/testing-on-windows.md`](https://github.com/javier-sy/midi-communications-windows/blob/master/dev/testing-on-windows.md).
 
-**WinRT `Windows.Devices.Midi`** is, under the new stack, another compatibility
-layer onto the same service. It offers what WinMM offers, in exchange for
-hand-written COM.
-
-## Differences from the macOS layer
-
-The two libraries implement the same contract over platforms that do not have
-the same shape. Where they differ, they differ because the platforms do:
-
-* **`manufacturer` and `model` are `nil`.** WinMM reports `wMid` and `wPid`,
-  numeric codes from a manufacturer registry that stopped being maintained in
-  the 1990s and that class-compliant USB devices almost all answer with
-  Microsoft's. Core MIDI reports real strings. Inventing text from the codes
-  would describe the code table, not the hardware.
-* **`display_name` is the port name.** On macOS it is composed as
-  "manufacturer model (name)", which here would be a name wrapped in the
-  punctuation of two absent fields.
-* **Port ids are unique within a direction, not across both.** A WinMM port is
-  identified by its index among inputs or among outputs, and that index is what
-  is passed to `midiInOpen`. Core MIDI numbers endpoints of both directions from
-  one counter. Input 0 and output 0 are both valid here, and unrelated.
-* **Port names are truncated to 31 characters, and do not identify a port.**
-  That is all WinMM stores, and it drops the rest silently. Two loopback
-  endpoints whose names differed only past character 31 came back identical in
-  every field of `MIDIINCAPSW` — same name, same `wMid`, same `wPid`, same
-  `wTechnology` — distinguishable only by index. Core MIDI names are neither
-  truncated nor, in practice, ambiguous.
-* **Enumeration is not cached, but wrappers are reused.** The macOS layer reads
-  the device list once and keeps it, so a device plugged in later is never seen.
-  Here WinMM is asked on every call, and a port still present comes back as the
-  same object it was before, so opening a port and then reading from it works
-  whether or not the caller kept the reference.
-* **There is no packet-list parsing.** Core MIDI delivers a list of packets that
-  has to be walked; WinMM delivers one complete short message at a time, with
-  running status already resolved by the driver.
-
-## Relationship to midi-winmm
-
-This library is **not** derived from [midi-winmm](http://github.com/arirusso/midi-winmm),
-which was written in 2011 for 32-bit Ruby. Windows is LLP64: on a 64-bit Ruby,
-`unsigned long` is 32 bits while a `HANDLE` is 64, so that library's
-`typedef :ulong, :HANDLE` truncates every handle it obtains. It also reads port
-names through the ANSI entry points, which mangle any name that is not ASCII.
-Both are addressed here by construction; see the notes in
-`lib/midi-communications-windows/api.rb`.
+Neither is part of the published gem, which is why those are links and not paths.
 
 ## Author
 
