@@ -8,7 +8,10 @@ Gem::Specification.new do |s|
   s.description = 'Access the Windows Multimedia (WinMM) MIDI API with Ruby.'
   s.authors     = ['Javier Sánchez Yeste']
   s.email       = ['javier.sy@gmail.com']
-  s.files       = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  # dev/ is how the library was measured, not how it is used: it describes
+  # installing preview software on a machine with no MIDI hardware, and has no
+  # business in every user's gem directory.
+  s.files       = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features|dev)/}) }
   s.homepage    = 'https://github.com/javier-sy/midi-communications-windows'
   s.license     = 'LGPL-3.0-or-later'
 

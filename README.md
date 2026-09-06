@@ -30,14 +30,11 @@ enough to make `Output`'s System Exclusive wait mean something, and a port
 appearing or disappearing while the program runs.
 
 The version stays in the 0.0.x series because that was a virtual machine with no
-MIDI hardware in it, not because anything is known to be missing. It will not be
-published to RubyGems until a physical MIDI interface has closed the items
-[`docs/testing-on-windows.md`](docs/testing-on-windows.md) lists as untestable
-without one.
+MIDI hardware in it, not because anything is known to be missing.
 
-That document is also how to rebuild the test environment: it is the procedure
-these measurements were taken with, including how to make two ports collide in
-WinMM's 31 characters of name.
+How those measurements were taken, and what a session with real hardware still
+has to close, is written down in
+[`dev/testing-on-windows.md`](dev/testing-on-windows.md).
 
 ### One thing worth knowing before you use it
 

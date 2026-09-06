@@ -4,5 +4,3 @@
 --no-private
 --embed-mixins
 lib/**/*.rb
--
-docs/testing-on-windows.md
