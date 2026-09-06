@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: MIDICommunicationsWindows::Input
+  
+    &mdash; MIDI Communications Windows API
+  
+</title>
+
+  <link rel="stylesheet" href="../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../css/common.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "MIDICommunicationsWindows::Input";
+  relpath = '../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../_index.html">Index (I)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../MIDICommunicationsWindows.html" title="MIDICommunicationsWindows (module)">MIDICommunicationsWindows</a></span></span>
+     &raquo; 
+    <span class="title">Input</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: MIDICommunicationsWindows::Input
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">MIDICommunicationsWindows::Input</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  <dl>
+      <dt>Extended by:</dt>
+      <dd><span class='object_link'><a href="Device/ClassMethods.html" title="MIDICommunicationsWindows::Device::ClassMethods (module)">Device::ClassMethods</a></span></dd>
+  </dl>
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="Device/InstanceMethods.html" title="MIDICommunicationsWindows::Device::InstanceMethods (module)">Device::InstanceMethods</a></span></dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/midi-communications-windows/input.rb
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>A MIDI input port: somewhere messages arrive from.</p>
+<h2 id="_gets__blocks__and_that_is_part_of_the_contract"><code>gets</code> blocks, and that is part of the contract</h2>
+<p><span class='object_link'><a href="#gets-instance_method" title="MIDICommunicationsWindows::Input#gets (method)">#gets</a></span> waits until at least one message has arrived and then returns
+everything that accumulated. It does not return an empty array.</p>
+<p>This is not an incidental property. <code>Musa::Clock::InputMidiClock</code> reads its
+MIDI Clock in a loop with no delay of its own, relying on <code>gets</code> to be where
+the thread waits. An implementation that returned immediately would turn
+that loop into a spin on a full core, and would do it silently — the notes
+would still play.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Read from the first input</p></div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_input'>input</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../MIDICommunicationsWindows.html" title="MIDICommunicationsWindows (module)">MIDICommunicationsWindows</a></span></span><span class='op'>::</span><span class='const'>Input</span><span class='period'>.</span><span class='id identifier rubyid_first'><span class='object_link'><a href="Device/ClassMethods.html#first-instance_method" title="MIDICommunicationsWindows::Device::ClassMethods#first (method)">first</a></span></span>
+<span class='id identifier rubyid_input'>input</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span>
+<span class='id identifier rubyid_input'>input</span><span class='period'>.</span><span class='id identifier rubyid_gets'>gets</span>
+<span class='comment'># =&gt; [{ data: [144, 60, 100], timestamp: 1789123456.789 }]</span></code></pre>
+    
+  </div>
+
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="Output.html" title="MIDICommunicationsWindows::Output (class)">for sending</a></span></li>
+    
+  </ul>
+
+</div>
+
+
+
+  <h2>Instance Attribute Summary <small><a href="#" class="summary_toggle">collapse</a></small></h2>
+  <ul class="summary">
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#enabled-instance_method" title="#enabled (instance method)">#<strong>enabled</strong>  &#x21d2; Object </a>
+    
+
+    
+      (also: #enabled?)
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#enabled-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#enabled (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#id-instance_method" title="#id (instance method)">#<strong>id</strong>  &#x21d2; Integer </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#id-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#id (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The port's WinMM index <strong>within its direction</strong>; see the note on identity in <span class='object_link'><a href="Device.html" title="MIDICommunicationsWindows::Device (module)">Device</a></span>.</p></div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#name-instance_method" title="#name (instance method)">#<strong>name</strong>  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#name-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#name (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The port's name, as WinMM reports it, truncated to 31 characters.</p></div></span>
+  
+</li>
+
+    
+  </ul>
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#all-class_method" title="#all (class method)">.<strong>all</strong>  &#x21d2; Array&lt;Input&gt;, Array&lt;Output&gt; </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      extended
+      from <span class='object_link'><a href="Device/ClassMethods.html#all-class_method" title="MIDICommunicationsWindows::Device::ClassMethods#all (method)">Device::ClassMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Every port of this direction.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#direction-class_method" title="direction (class method)">.<strong>direction</strong>  &#x21d2; Symbol </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p><code>:input</code>.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#first-class_method" title="#first (class method)">.<strong>first</strong>  &#x21d2; Input, ... </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      extended
+      from <span class='object_link'><a href="Device/ClassMethods.html#first-class_method" title="MIDICommunicationsWindows::Device::ClassMethods#first (method)">Device::ClassMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The first port of this direction, or nil if there are none.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#last-class_method" title="#last (class method)">.<strong>last</strong>  &#x21d2; Input, ... </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      extended
+      from <span class='object_link'><a href="Device/ClassMethods.html#last-class_method" title="MIDICommunicationsWindows::Device::ClassMethods#last (method)">Device::ClassMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The last port of this direction, or nil if there are none.</p></div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#close-instance_method" title="#close (instance method)">#<strong>close</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#close-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#close (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Closes the port.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#display_name-instance_method" title="#display_name (instance method)">#<strong>display_name</strong>  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#display_name-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#display_name (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The name to show a person choosing a port.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#gets-instance_method" title="#gets (instance method)">#<strong>gets</strong>  &#x21d2; Array&lt;Hash&gt; </a>
+    
+
+    
+      (also: #read)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Reads the messages that have arrived.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#gets_s-instance_method" title="#gets_s (instance method)">#<strong>gets_s</strong>  &#x21d2; Array&lt;Hash&gt; </a>
+    
+
+    
+      (also: #gets_bytestr)
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Reads the messages that have arrived, with their data as hex strings.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(id, name)  &#x21d2; Input </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  <span class="private note title">private</span>
+
+  
+    <span class="summary_desc"><div class='inline'><p>A new instance of Input.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#manufacturer-instance_method" title="#manufacturer (instance method)">#<strong>manufacturer</strong>  &#x21d2; nil </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#manufacturer-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#manufacturer (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Who made the device.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#model-instance_method" title="#model (instance method)">#<strong>model</strong>  &#x21d2; nil </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#model-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#model (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The device model.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#open-instance_method" title="#open (instance method)">#<strong>open</strong> {|self| ... } &#x21d2; self </a>
+    
+
+    
+      (also: #enable, #start)
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#open-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#open (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Opens the port.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#to_s-instance_method" title="#to_s (instance method)">#<strong>to_s</strong>  &#x21d2; String </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#to_s-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#to_s (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#type-instance_method" title="#type (instance method)">#<strong>type</strong>  &#x21d2; Symbol </a>
+    
+
+    
+  </span>
+  
+    <span class="note title not_defined_here">
+      included
+      from <span class='object_link'><a href="Device/InstanceMethods.html#type-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#type (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The port's direction.</p></div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+  
+  
+  
+  <div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(id, name)  &#x21d2; <tt><span class='object_link'><a href="" title="MIDICommunicationsWindows::Input (class)">Input</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p class="note private">
+  <strong>This method is part of a private API.</strong>
+  You should avoid using this method if possible, as it may be removed or be changed in the future.
+</p>
+<p>Returns a new instance of Input.</p>
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>id</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the port's WinMM index among inputs</p></div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>name</span>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the port's name as reported by WinMM</p></div>
+      
+    </li>
+  
+</ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+36
+37
+38
+39
+40
+41</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/midi-communications-windows/input.rb', line 36</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_id'>id</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+  <span class='kw'>super</span>
+
+  <span class='ivar'>@queue</span> <span class='op'>=</span> <span class='const'>Queue</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
+  <span class='ivar'>@sysex</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+  <div id="instance_attr_details" class="attr_details">
+    <h2>Instance Attribute Details</h2>
+    
+      
+      <span id=""></span>
+      <div class="method_details first">
+  <h3 class="signature first" id="enabled-instance_method">
+  
+    #<strong>enabled</strong>  &#x21d2; <tt>Object</tt>  <span class="extras">(readonly)</span>
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='enabled?-instance_method'>enabled?</span></span>
+    </span>
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#enabled-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#enabled (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="id-instance_method">
+  
+    #<strong>id</strong>  &#x21d2; <tt>Integer</tt>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#id-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#id (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the port's WinMM index <strong>within its direction</strong>;
+see the note on identity in <span class='object_link'><a href="Device.html" title="MIDICommunicationsWindows::Device (module)">MIDICommunicationsWindows::Device</a></span>.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the port's WinMM index <strong>within its direction</strong>;
+see the note on identity in <span class='object_link'><a href="Device.html" title="MIDICommunicationsWindows::Device (module)">MIDICommunicationsWindows::Device</a></span></p></div>
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="name-instance_method">
+  
+    #<strong>name</strong>  &#x21d2; <tt>String</tt>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#name-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#name (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the port's name, as WinMM reports it, truncated to
+31 characters. <strong>Not unique</strong>: see the note on names in <span class='object_link'><a href="Device.html" title="MIDICommunicationsWindows::Device (module)">MIDICommunicationsWindows::Device</a></span>.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the port's name, as WinMM reports it, truncated to
+31 characters. <strong>Not unique</strong>: see the note on names in <span class='object_link'><a href="Device.html" title="MIDICommunicationsWindows::Device (module)">MIDICommunicationsWindows::Device</a></span>.</p></div>
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+  </div>
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="all-class_method">
+  
+    .<strong>all</strong>  &#x21d2; <tt>Array&lt;<span class='object_link'><a href="" title="MIDICommunicationsWindows::Input (class)">Input</a></span>&gt;</tt>, <tt>Array&lt;<span class='object_link'><a href="Output.html" title="MIDICommunicationsWindows::Output (class)">Output</a></span>&gt;</tt> 
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/ClassMethods.html#all-class_method" title="MIDICommunicationsWindows::Device::ClassMethods#all (method)">Device::ClassMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Every port of this direction.</p>
+<p>WinMM is asked afresh on every call, so a port that appeared or went
+away since the last one is reflected. A port that is still there comes
+back as the same object as before; see <span class='object_link'><a href="Device.html#enumerate-class_method" title="MIDICommunicationsWindows::Device.enumerate (method)">MIDICommunicationsWindows::Device.enumerate</a></span>.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array&lt;<span class='object_link'><a href="" title="MIDICommunicationsWindows::Input (class)">Input</a></span>&gt;</tt>, <tt>Array&lt;<span class='object_link'><a href="Output.html" title="MIDICommunicationsWindows::Output (class)">Output</a></span>&gt;</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="direction-class_method">
+  
+    .<strong>direction</strong>  &#x21d2; <tt>Symbol</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns <code>:input</code>.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p><code>:input</code></p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+29
+30
+31</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/midi-communications-windows/input.rb', line 29</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_direction'>direction</span>
+  <span class='symbol'>:input</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="first-class_method">
+  
+    .<strong>first</strong>  &#x21d2; <tt><span class='object_link'><a href="" title="MIDICommunicationsWindows::Input (class)">Input</a></span></tt>, ... 
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/ClassMethods.html#first-class_method" title="MIDICommunicationsWindows::Device::ClassMethods#first (method)">Device::ClassMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>The first port of this direction, or nil if there are none.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="MIDICommunicationsWindows::Input (class)">Input</a></span></tt>, <tt><span class='object_link'><a href="Output.html" title="MIDICommunicationsWindows::Output (class)">Output</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="last-class_method">
+  
+    .<strong>last</strong>  &#x21d2; <tt><span class='object_link'><a href="" title="MIDICommunicationsWindows::Input (class)">Input</a></span></tt>, ... 
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/ClassMethods.html#last-class_method" title="MIDICommunicationsWindows::Device::ClassMethods#last (method)">Device::ClassMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>The last port of this direction, or nil if there are none.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="MIDICommunicationsWindows::Input (class)">Input</a></span></tt>, <tt><span class='object_link'><a href="Output.html" title="MIDICommunicationsWindows::Output (class)">Output</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+  </div>
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="close-instance_method">
+  
+    #<strong>close</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#close-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#close (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Closes the port.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>true if it was open, false if it already was not</p></div>
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="display_name-instance_method">
+  
+    #<strong>display_name</strong>  &#x21d2; <tt>String</tt> 
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#display_name-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#display_name (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>The name to show a person choosing a port.</p>
+<p>This is the port name unchanged. On macOS the display name is built as
+&quot;manufacturer model (name)&quot;, which here would render as a name wrapped
+in the punctuation of two absent fields.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="gets-instance_method">
+  
+    #<strong>gets</strong>  &#x21d2; <tt>Array&lt;Hash&gt;</tt> 
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='read-instance_method'>read</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Reads the messages that have arrived.</p>
+<p>Blocks until there is at least one. See the note on the class.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+      <pre class="example code"><code><span class='id identifier rubyid_input'>input</span><span class='period'>.</span><span class='id identifier rubyid_gets'>gets</span>
+<span class='comment'># =&gt; [{ data: [248], timestamp: 1789123456.789 },
+</span><span class='comment'>#     { data: [144, 60, 100], timestamp: 1789123456.812 }]</span></code></pre>
+    
+  </div>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array&lt;Hash&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>each with <code>:data</code>, an array of numeric bytes, and
+<code>:timestamp</code>, a Float of seconds</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/midi-communications-windows/input.rb', line 54</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_gets'>gets</span>
+  <span class='comment'># Queue#pop is where the thread waits, and it is the whole of the waiting
+</span>  <span class='comment'># mechanism on purpose. The obvious alternative — test whether the queue
+</span>  <span class='comment'># is empty, then sleep, and have the producer Thread#run the sleeper — has
+</span>  <span class='comment'># a window between the test and the sleep in which a message can arrive
+</span>  <span class='comment'># and its wake-up be delivered to a thread that is not sleeping yet. The
+</span>  <span class='comment'># reader then sleeps forever, and the thread it happens on is the one
+</span>  <span class='comment'># carrying the MIDI clock. Queue does the same job with no such window.
+</span>  <span class='id identifier rubyid_messages'>messages</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_messages'>messages</span> <span class='op'>&lt;&lt;</span> <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_pop'>pop</span> <span class='kw'>until</span> <span class='ivar'>@queue</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+
+  <span class='id identifier rubyid_messages'>messages</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="gets_s-instance_method">
+  
+    #<strong>gets_s</strong>  &#x21d2; <tt>Array&lt;Hash&gt;</tt> 
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='gets_bytestr-instance_method'>gets_bytestr</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Reads the messages that have arrived, with their data as hex strings.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+      <pre class="example code"><code><span class='id identifier rubyid_input'>input</span><span class='period'>.</span><span class='id identifier rubyid_gets_s'>gets_s</span>
+<span class='comment'># =&gt; [{ data: &#39;F8&#39;, timestamp: 1789123456.789 }]</span></code></pre>
+    
+  </div>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array&lt;Hash&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>as <span class='object_link'><a href="#gets-instance_method" title="MIDICommunicationsWindows::Input#gets (method)">#gets</a></span>, but <code>:data</code> is a String</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+76
+77
+78
+79
+80</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/midi-communications-windows/input.rb', line 76</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_gets_s'>gets_s</span>
+  <span class='id identifier rubyid_gets'>gets</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_message'>message</span><span class='op'>|</span>
+    <span class='id identifier rubyid_message'>message</span><span class='lbracket'>[</span><span class='symbol'>:data</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="TypeConversion.html" title="MIDICommunicationsWindows::TypeConversion (module)">TypeConversion</a></span></span><span class='period'>.</span><span class='id identifier rubyid_numeric_bytes_to_hex_string'><span class='object_link'><a href="TypeConversion.html#numeric_bytes_to_hex_string-instance_method" title="MIDICommunicationsWindows::TypeConversion#numeric_bytes_to_hex_string (method)">numeric_bytes_to_hex_string</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_message'>message</span><span class='lbracket'>[</span><span class='symbol'>:data</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="manufacturer-instance_method">
+  
+    #<strong>manufacturer</strong>  &#x21d2; <tt>nil</tt> 
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#manufacturer-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#manufacturer (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Who made the device.</p>
+<p>Always nil on Windows. See the note in <span class='object_link'><a href="Device.html" title="MIDICommunicationsWindows::Device (module)">MIDICommunicationsWindows::Device</a></span> for why this is not
+derived from <code>wMid</code>.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="model-instance_method">
+  
+    #<strong>model</strong>  &#x21d2; <tt>nil</tt> 
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#model-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#model (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>The device model.</p>
+<p>Always nil on Windows, for the same reason as <span class='object_link'><a href="Device/InstanceMethods.html#manufacturer-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#manufacturer (method)">#manufacturer</a></span>.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>nil</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="open-instance_method">
+  
+    #<strong>open</strong> {|self| ... } &#x21d2; <tt>self</tt> 
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='enable-instance_method'>enable</span>, <span id='start-instance_method'>start</span></span>
+    </span>
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#open-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#open (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Opens the port.</p>
+<p>Opening twice is not an error and does nothing the second time, which
+is what <code>midi-communications</code> relies on when it opens a port a caller
+may already hold.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Yields:</p>
+<ul class="yield">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>if a block is given, the port is closed when it returns</p></div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>self</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Error.html" title="MIDICommunicationsWindows::Error (class)">Error</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>if WinMM refuses to open the port</p></div>
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="to_s-instance_method">
+  
+    #<strong>to_s</strong>  &#x21d2; <tt>String</tt> 
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#to_s-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#to_s (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="type-instance_method">
+  
+    #<strong>type</strong>  &#x21d2; <tt>Symbol</tt> 
+  
+
+  
+
+  
+    <span class="not_defined_here">
+      Originally defined in module
+        <span class='object_link'><a href="Device/InstanceMethods.html#type-instance_method" title="MIDICommunicationsWindows::Device::InstanceMethods#type (method)">Device::InstanceMethods</a></span>
+    </span>
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>The port's direction.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p><code>:input</code> or <code>:output</code></p></div>
+      
+    </li>
+  
+</ul>
+
+</div>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Sun Sep  6 20:09:25 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-3.4.7).
+</div>
+
+    </div>
+  </body>
+</html>

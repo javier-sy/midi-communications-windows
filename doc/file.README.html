@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: README
+  
+    &mdash; MIDI Communications Windows API
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "README";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="MIDI_Communications_Windows_Layer">MIDI Communications Windows Layer</h1>
+<p><a href="https://www.ruby-lang.org/"><img src="https://img.shields.io/badge/ruby-2.7+-red.svg" alt="Ruby Version" /></a>
+<a href="https://www.gnu.org/licenses/lgpl-3.0.html"><img src="https://img.shields.io/badge/license-LGPL--3.0--or--later-blue.svg" alt="License" /></a></p>
+<p><strong>Realtime MIDI IO with Ruby for Windows.</strong></p>
+<p>Access the <a href="https://learn.microsoft.com/en-us/windows/win32/multimedia/midi-reference">Windows Multimedia (WinMM) MIDI API</a> with Ruby.</p>
+<p>This library is part of a suite of Ruby libraries for MIDI:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Library</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MIDI Events representation</td>
+<td><a href="https://github.com/javier-sy/midi-events">MIDI Events</a></td>
+</tr>
+<tr>
+<td>MIDI Data parsing</td>
+<td><a href="https://github.com/javier-sy/midi-parser">MIDI Parser</a></td>
+</tr>
+<tr>
+<td>MIDI communication with Instruments and Control Surfaces</td>
+<td><a href="https://github.com/javier-sy/midi-communications">MIDI Communications</a></td>
+</tr>
+<tr>
+<td>Low level MIDI interface to MacOS</td>
+<td><a href="https://github.com/javier-sy/midi-communications-macos">MIDI Communications MacOS Layer</a></td>
+</tr>
+<tr>
+<td>Low level MIDI interface to Windows</td>
+<td><a href="https://github.com/javier-sy/midi-communications-windows">MIDI Communications Windows Layer</a> (this library)</td>
+</tr>
+<tr>
+<td>Low level MIDI interface to Linux</td>
+<td><strong>TO DO</strong> (by now <a href="https://github.com/javier-sy/midi-communications">MIDI Communications</a> uses <a href="http://github.com/arirusso/alsa-rawmidi">alsa-rawmidi</a>)</td>
+</tr>
+<tr>
+<td>Low level MIDI interface to JRuby</td>
+<td><strong>TO DO</strong> (by now <a href="https://github.com/javier-sy/midi-communications">MIDI Communications</a> uses <a href="http://github.com/arirusso/midi-jruby">midi-jruby</a>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Status">Status</h2>
+<p><strong>Work in progress.</strong> All of it is written; none of it has been run as a whole.</p>
+<p>| | |
+| --- | --- |
+| Enumerating ports | written; enumeration verified on Windows 11 25H2 |
+| Sending short messages | written; message packing verified against WinMM |
+| Sending System Exclusive | written, not yet exercised |
+| Receiving, including System Exclusive | written, not yet exercised as a whole |</p>
+<p>Every mechanism the receiving path rests on was measured working on Windows 11
+25H2 against a system loopback: <code>CALLBACK_THREAD</code> delivery, the parameters each
+notification carries, recycling a System Exclusive buffer from inside the reader
+thread's own message loop, fragmentation across buffers, and the closing
+sequence. What has not been run is this library's assembly of them.</p>
+<p>Receiving takes input through <code>CALLBACK_THREAD</code>, where WinMM posts to the
+message queue of a thread this library owns, rather than <code>CALLBACK_FUNCTION</code>,
+where the driver's own thread calls into Ruby. Both were measured working, so it
+is a design choice: the second lets a Ruby callback wait on the GVL while a
+driver thread waits on the callback, which is not hypothetical — it produced
+duplicate MIDI deliveries with the send reporting an error. <code>CALLBACK_THREAD</code>
+makes that impossible rather than guarding against it. See the notes in
+<code>lib/midi-communications-windows/api.rb</code> and <code>input.rb</code>.</p>
+<h2 id="Requirements">Requirements</h2>
+<ul>
+<li><a href="http://github.com/ffi/ffi">ffi</a></li>
+</ul>
+<p>Nothing else. <code>winmm.dll</code> is part of Windows, so this gem binds a library that
+is already on the machine and ships no compiled artifact of its own.</p>
+<h2 id="Installation">Installation</h2>
+<p>If you're using Bundler, add this line to your application's Gemfile:</p>
+<p><code>gem &quot;midi-communications-windows&quot;</code></p>
+<p>Otherwise</p>
+<p><code>gem install midi-communications-windows</code></p>
+<h2 id="Documentation">Documentation</h2>
+<p><a href="http://rubydoc.info/github/javier-sy/midi-communications-windows">rdoc</a></p>
+<h2 id="Why_WinMM_and_not_one_of_the_newer_Windows_MIDI_APIs">Why WinMM and not one of the newer Windows MIDI APIs</h2>
+<p>Windows has three MIDI APIs a program could reach for, and as of February 2026
+the oldest is the right one for Ruby.</p>
+<p><strong>Windows MIDI Services</strong> became generally available in Windows 11 that month,
+replacing the MIDI stack underneath. Rather than retiring the older APIs,
+Microsoft reconnected them to the new service. A WinMM client therefore stopped
+holding ports exclusively, gained multi-client access, and can see the loopback
+endpoints the system now provides itself — with nothing to install. On Windows
+10 WinMM behaves as it always did, and a third-party loopback driver is still
+needed to route MIDI between applications.</p>
+<p><strong>The Windows MIDI Services App SDK</strong> offers MIDI 2.0 and UMP, neither of which
+this library needs: <code>midi-communications</code> and MusaDSL are MIDI 1.0 throughout.
+It is published only as WinRT, and Microsoft's guidance is that other languages
+obtain a WinRT projection from their toolchain. Ruby has none.</p>
+<p><strong>WinRT <code>Windows.Devices.Midi</code></strong> is, under the new stack, another compatibility
+layer onto the same service. It offers what WinMM offers, in exchange for
+hand-written COM.</p>
+<h2 id="Differences_from_the_macOS_layer">Differences from the macOS layer</h2>
+<p>The two libraries implement the same contract over platforms that do not have
+the same shape. Where they differ, they differ because the platforms do:</p>
+<ul>
+<li><strong><code>manufacturer</code> and <code>model</code> are <code>nil</code>.</strong> WinMM reports <code>wMid</code> and <code>wPid</code>,
+numeric codes from a manufacturer registry that stopped being maintained in
+the 1990s and that class-compliant USB devices almost all answer with
+Microsoft's. Core MIDI reports real strings. Inventing text from the codes
+would describe the code table, not the hardware.</li>
+<li><strong><code>display_name</code> is the port name.</strong> On macOS it is composed as
+&quot;manufacturer model (name)&quot;, which here would be a name wrapped in the
+punctuation of two absent fields.</li>
+<li><strong>Port ids are unique within a direction, not across both.</strong> A WinMM port is
+identified by its index among inputs or among outputs, and that index is what
+is passed to <code>midiInOpen</code>. Core MIDI numbers endpoints of both directions from
+one counter. Input 0 and output 0 are both valid here, and unrelated.</li>
+<li><strong>Port names are truncated to 31 characters, and do not identify a port.</strong>
+That is all WinMM stores, and it drops the rest silently. Two loopback
+endpoints whose names differed only past character 31 came back identical in
+every field of <code>MIDIINCAPSW</code> — same name, same <code>wMid</code>, same <code>wPid</code>, same
+<code>wTechnology</code> — distinguishable only by index. Core MIDI names are neither
+truncated nor, in practice, ambiguous.</li>
+<li><strong>Enumeration is not cached, but wrappers are reused.</strong> The macOS layer reads
+the device list once and keeps it, so a device plugged in later is never seen.
+Here WinMM is asked on every call, and a port still present comes back as the
+same object it was before, so opening a port and then reading from it works
+whether or not the caller kept the reference.</li>
+<li><strong>There is no packet-list parsing.</strong> Core MIDI delivers a list of packets that
+has to be walked; WinMM delivers one complete short message at a time, with
+running status already resolved by the driver.</li>
+</ul>
+<h2 id="Relationship_to_midi_winmm">Relationship to midi-winmm</h2>
+<p>This library is <strong>not</strong> derived from <a href="http://github.com/arirusso/midi-winmm">midi-winmm</a>,
+which was written in 2011 for 32-bit Ruby. Windows is LLP64: on a 64-bit Ruby,
+<code>unsigned long</code> is 32 bits while a <code>HANDLE</code> is 64, so that library's
+<code>typedef :ulong, :HANDLE</code> truncates every handle it obtains. It also reads port
+names through the ANSI entry points, which mangle any name that is not ASCII.
+Both are addressed here by construction; see the notes in
+<code>lib/midi-communications-windows/api.rb</code>.</p>
+<h2 id="Author">Author</h2>
+<ul>
+<li><a href="https://github.com/javier-sy">Javier Sánchez Yeste</a></li>
+</ul>
+<h2 id="License">License</h2>
+<p><a href="https://github.com/javier-sy/midi-communications-windows">MIDI Communications Windows Layer</a> Copyright (c) 2026 <a href="https://yeste.studio">Javier Sánchez Yeste</a>, licensed under LGPL 3.0 License</p></div></div>
+
+      <div id="footer">
+  Generated on Sun Sep  6 20:09:25 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-3.4.7).
+</div>
+
+    </div>
+  </body>
+</html>

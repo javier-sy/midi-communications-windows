@@ -1,0 +1,6 @@
+# Configuración de versión para midi-communications-windows
+GEM_NAME="midi-communications-windows"
+MODULE_NAME="MIDICommunicationsWindows"
+VERSION_FILE="lib/midi-communications-windows/version.rb"
+GEMSPEC_FILE="midi-communications-windows.gemspec"
+TEST_COMMAND="bundle exec rake test"

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Module: MIDICommunicationsWindows
+  
+    &mdash; MIDI Communications Windows API
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="css/common.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "MIDICommunicationsWindows";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (M)</a> &raquo;
+    
+    
+    <span class="title">MIDICommunicationsWindows</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Module: MIDICommunicationsWindows
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/midi-communications-windows.rb<span class="defines">,<br>
+  lib/midi-communications-windows/api.rb,<br> lib/midi-communications-windows/input.rb,<br> lib/midi-communications-windows/device.rb,<br> lib/midi-communications-windows/output.rb,<br> lib/midi-communications-windows/message.rb,<br> lib/midi-communications-windows/version.rb,<br> lib/midi-communications-windows/type_conversion.rb</span>
+
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>Windows-specific MIDI I/O through the Windows Multimedia (WinMM) API.</p>
+<p>This library gives low-level access to MIDI ports on Windows by binding
+<code>winmm.dll</code> with FFI. It is normally used through the higher-level
+<a href="https://github.com/javier-sy/midi-communications" target="_parent" title="midi-communications">midi-communications</a> gem,
+which selects it automatically on Windows.</p>
+<p>The classes are <span class='object_link'><a href="MIDICommunicationsWindows/Input.html" title="MIDICommunicationsWindows::Input (class)">Input</a></span>, for receiving, and <span class='object_link'><a href="MIDICommunicationsWindows/Output.html" title="MIDICommunicationsWindows::Output (class)">Output</a></span>, for sending. <span class='object_link'><a href="MIDICommunicationsWindows/Device.html" title="MIDICommunicationsWindows::Device (module)">Device</a></span>
+enumerates both.</p>
+<h2 id="Why_WinMM__and_not_one_of_the_newer_APIs">Why WinMM, and not one of the newer APIs</h2>
+<p>Windows has three MIDI APIs a program could use. WinMM is the oldest, and as
+of February 2026 it is also the most sensible choice for Ruby.</p>
+<p>Windows MIDI Services, generally available in Windows 11 since then, replaced
+the MIDI stack underneath. The existing MIDI 1.0 APIs were reconnected to the
+new service rather than retired, so a WinMM client stopped holding ports
+exclusively, gained multi-client access, and can see the loopback endpoints
+the system now provides itself. It also needs nothing installed to get any of
+that. On Windows 10 WinMM behaves as it always did.</p>
+<p>The new App SDK offers MIDI 2.0 and UMP, which this library does not need —
+<code>midi-communications</code> and MusaDSL are MIDI 1.0 throughout — and it is
+published only as WinRT. Microsoft's own guidance is that other languages
+need a WinRT projection from their toolchain, and Ruby has none.</p>
+<h2 id="Why_no_compiled_artifact">Why no compiled artifact</h2>
+<p><code>winmm.dll</code> is present on every Windows installation, so this gem binds a
+library that is already there and ships no binary of its own. The only
+compiled dependency is <code>ffi</code> itself, which is published for every Windows
+platform including ARM64. Distributing platform-specific binaries through
+RubyGems is where installations break; there is nothing here to break.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>List the output ports</p></div></h5>
+      
+      <pre class="example code"><code><span class='const'>MIDICommunicationsWindows</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="MIDICommunicationsWindows/Output.html" title="MIDICommunicationsWindows::Output (class)">Output</a></span></span><span class='period'>.</span><span class='id identifier rubyid_all'><span class='object_link'><a href="MIDICommunicationsWindows/Device/ClassMethods.html#all-instance_method" title="MIDICommunicationsWindows::Device::ClassMethods#all (method)">all</a></span></span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_output'>output</span><span class='op'>|</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_id'>id</span><span class='embexpr_end'>}</span><span class='tstring_content'>: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span></code></pre>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Send a note</p></div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_output'>output</span> <span class='op'>=</span> <span class='const'>MIDICommunicationsWindows</span><span class='op'>::</span><span class='const'><span class='object_link'><a href="MIDICommunicationsWindows/Output.html" title="MIDICommunicationsWindows::Output (class)">Output</a></span></span><span class='period'>.</span><span class='id identifier rubyid_first'><span class='object_link'><a href="MIDICommunicationsWindows/Device/ClassMethods.html#first-instance_method" title="MIDICommunicationsWindows::Device::ClassMethods#first (method)">first</a></span></span>
+<span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span>
+<span class='id identifier rubyid_output'>output</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span><span class='lparen'>(</span><span class='int'>0x90</span><span class='comma'>,</span> <span class='int'>60</span><span class='comma'>,</span> <span class='int'>100</span><span class='rparen'>)</span></code></pre>
+    
+  </div>
+
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><a href="https://learn.microsoft.com/en-us/windows/win32/multimedia/midi-reference" target="_parent" title="Microsoft&#39;s MIDI reference">Microsoft's MIDI reference</a></li>
+    
+  </ul>
+
+</div><h2>Defined Under Namespace</h2>
+<p class="children">
+  
+    
+      <strong class="modules">Modules:</strong> <span class='object_link'><a href="MIDICommunicationsWindows/API.html" title="MIDICommunicationsWindows::API (module)">API</a></span>, <span class='object_link'><a href="MIDICommunicationsWindows/Device.html" title="MIDICommunicationsWindows::Device (module)">Device</a></span>, <span class='object_link'><a href="MIDICommunicationsWindows/Message.html" title="MIDICommunicationsWindows::Message (module)">Message</a></span>, <span class='object_link'><a href="MIDICommunicationsWindows/TypeConversion.html" title="MIDICommunicationsWindows::TypeConversion (module)">TypeConversion</a></span>
+    
+  
+    
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="MIDICommunicationsWindows/Error.html" title="MIDICommunicationsWindows::Error (class)">Error</a></span>, <span class='object_link'><a href="MIDICommunicationsWindows/Input.html" title="MIDICommunicationsWindows::Input (class)">Input</a></span>, <span class='object_link'><a href="MIDICommunicationsWindows/Output.html" title="MIDICommunicationsWindows::Output (class)">Output</a></span>
+    
+  
+</p>
+
+  
+    <h2>
+      Constant Summary
+      <small><a href="#" class="constants_summary_toggle">collapse</a></small>
+    </h2>
+
+    <dl class="constants">
+      
+        <dt id="VERSION-constant" class="">VERSION =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Current version of the midi-communications-windows gem.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>0.0.1</span><span class='tstring_end'>&#39;</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+    </dl>
+  
+
+
+
+
+
+
+
+
+
+</div>
+
+      <div id="footer">
+  Generated on Sun Sep  6 20:09:25 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-3.4.7).
+</div>
+
+    </div>
+  </body>
+</html>
