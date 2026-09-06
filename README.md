@@ -38,22 +38,13 @@ Runnable examples of the API are in [`examples/`](examples).
 
 ## Status
 
-**Early.** Enumeration, sending, receiving and System Exclusive in both
-directions work, and were exercised on Windows 11 25H2. What has not been
-exercised is anything needing a physical MIDI interface: the two timeouts, ports
-being renumbered when one is plugged in or unplugged, whether an input and an
-output of the same device report the same name, and the handling of a device
-error during System Exclusive input.
-
-It is in the 0.0.x series for that reason, not because anything is known to be
-missing.
+**Early.** Tested on Windows 11 without external MIDI devices. Everything works
+against loopback ports; running it against real hardware is still pending, and
+that is why it is in the 0.0.x series.
 
 ## Requirements
 
 * [ffi](http://github.com/ffi/ffi)
-
-It has only been run on Windows 11. Nothing in it needs Windows 11 — it calls no
-API newer than WinMM — but older versions are untested.
 
 ## Installation
 
