@@ -4,5 +4,5 @@ lib/midi-communications-windows/input.rb 36e58891d1c604dd4b2f333382a4010660d4786
 lib/midi-communications-windows/device.rb 9f151193d144c298c064592ee21d44111f968d01
 lib/midi-communications-windows/output.rb 3069d46892268c529d999363bd05fac891e5f4fc
 lib/midi-communications-windows/message.rb 2390946620b244ec12a6b373e003304ef9c29e4d
-lib/midi-communications-windows/version.rb 902ae38c68bbfd2670740b7d7bb6a342f77cbb68
+lib/midi-communications-windows/version.rb 8cee586a3fedd509f700cf89dec10a1699f78c97
 lib/midi-communications-windows/type_conversion.rb dae7dc5109d955f4693920fa173f5c143dcb7bf1

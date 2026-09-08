@@ -3,7 +3,7 @@ require_relative 'lib/midi-communications-windows/version'
 Gem::Specification.new do |s|
   s.name        = 'midi-communications-windows'
   s.version     = MIDICommunicationsWindows::VERSION
-  s.date        = '2026-09-07'
+  s.date        = '2026-09-08'
   s.summary     = 'Realtime MIDI IO with Ruby for Windows'
   s.description = 'Access the Windows Multimedia (WinMM) MIDI API with Ruby.'
   s.authors     = ['Javier Sánchez Yeste']
