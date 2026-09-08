@@ -193,25 +193,39 @@ in all three lengths (3, 2 and 1 bytes), accumulation in `gets`, System Exclusiv
 both ways at 200, 3000 and 5000 bytes, buffer recycling, closing and reopening,
 and the propagation of an error from opening a port.
 
-**Not testable with this setup**, and therefore still untested:
+**Not testable with this setup:** anything needing a physical MIDI interface, and
+any measurement of time. Some of it has since been closed elsewhere; see below.
 
-- **`SYSEX_TIMEOUT` / `Output#wait_until_sent`.** The only real output device is
-  the *GS Wavetable Synth*, a software synthesiser that marks `MHDR_DONE` in
-  under a millisecond because there is no wire. This needs a physical interface.
-- **`RESET_TIMEOUT` / `Input#await_returned_buffers`.** It never came close:
-  closes took between 4 and 21 ms against a one-second bound. The
-  device-went-away path needs something to unplug.
-- **Renumbering in `Device.enumerate`.** Needs a port to actually appear or go.
-- **`MM_MIM_LONGERROR`.** None could be provoked, not even with a System
-  Exclusive message larger than the entire buffer queue. The code handling it is
-  unexercised — its presence has been shown harmless, which is not the same
-  thing.
-- **That an input and an output of the same device share a name.** Established
-  for a loopback, where they are literally the same device. Not for a real USB
-  interface.
-- **Any measurement of time.**
+## 6b. What a real machine closed, 2026-09-08
 
-Those are the items a session with real hardware should close.
+Windows 11 with real hardware — an Akai MPK mini Play mk3 alongside three
+loopback ports — and a piece running under Bitwig's clock.
+
+Closed:
+
+- **Receiving from a real device, and the timings.** A piece followed the DAW's
+  clock and played correctly. The earlier numbers were taken through emulation
+  inside a virtual machine and meant nothing; these do.
+- **An input and an output of the same device report the same name.** Previously
+  established only for a loopback, where the two are literally one device. The
+  MPK appears as input 3 and output 4 with names identical byte for byte —
+  compared as bytes, not by eye. This is what `musalce-server` relies on when it
+  pairs a clock input with an output by name.
+- **A port that goes away stops being listed, and only it.** Unplugging the MPK
+  removed its two entries and left the others untouched.
+
+Still unexercised:
+
+- **`SYSEX_TIMEOUT` / `Output#wait_until_sent`**, and **`MM_MIM_LONGERROR`**.
+  Both need System Exclusive against a device slow enough to be caught mid-send.
+  Sending System Exclusive works; what has never run is the path where the device
+  stops responding.
+- **Renumbering in `Device.enumerate`.** Unplugging the MPK did not test it: it
+  was last in both lists, so nothing after it shifted. The case that matters is a
+  port disappearing from the middle, which here would mean removing a loopback
+  in use. The guard is that a wrapper is reused only when index *and* name match,
+  so a renumbered index brings a different name and a new wrapper — reasoned, not
+  observed.
 
 ## 7. One finding from here worth not forgetting
 
